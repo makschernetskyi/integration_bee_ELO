@@ -1,10 +1,11 @@
 # Elo Simulation System
 
-This project implements an Elo-based rating system simulation designed to explore suitable configurations for ranking players in the Integration Bee competition. It provides tools to simulate single-elimination tournaments, calculate dynamic player ratings, and periodically decay ratings toward the mean to reflect long-term stability.
+This projects creates a sandbox for simulating elo rankings and finding the most suitable solutions for new areas where it wasn't used before. It includes not only simulation, but also experimenting with different elo and elo-like approaches, optimization for best parameters and construction of suitable metrics.
 
 ## Introduction
 
-The Integration Bee is a mathematical competition requiring a precise, dynamic, and fair ranking system to evaluate participants' skill levels. This project adapts the Elo rating system to address the unique challenges posed by such competitions, ensuring meaningful updates to player rankings after each event while maintaining a balance between long-term stability and responsiveness to recent performances.
+This projest appeared as part of the idea to standardize Integration bees across different universities in the world. starting form integration bee austria.
+The Integration Bee is a prestige calculus competition requiring a precise, dynamic, and fair ranking system to evaluate participants' skill levels. This project adapts the Elo rating system to address the challenges posed by such competitions, ensuring meaningful updates to player rankings after each event while maintaining a balance between long-term stability and responsiveness to recent performances.
 
 ## The Elo Rating System
 
@@ -12,58 +13,93 @@ Elo is a method for calculating the relative skill levels of players in competit
 
 The update mechanism compares this expected score with the actual outcome and adjusts ratings proportionally. A parameter called the K-factor determines the sensitivity of the rating system. Higher K-factors allow ratings to shift more dramatically after a single match, while lower values prioritize stability over time.
 
-## Challenges in the Integration Bee Context
+## Specifics of integration bee
 
-### Infrequent Competitions
+Integration bee competitions are rare and expensive events hosting only around 16 participants each time.
+They also progress in complexity and overall skill levels. This means the rating has to be responsive, yet stable enough. It also has to account for the fact that recent wins have to be more valued than the old results.
+Additionally, the higher win-loss margin will affect the change in rating more.
 
-Integration Bee events occur infrequently, which makes every match disproportionately impactful compared to systems where games happen regularly. This requires careful calibration of the K-factor. While a higher K-factor ensures that each match meaningfully affects the player's rating, overly large changes can destabilize the system. To address this, we use a moderately high K-factor while keeping the starting ratings at a controlled level, ensuring that changes are impactful yet stable.
++ usually problems in later rounds are more complex and they last longer making them more fair which means that results there have to have more weight in comparison to e.g. 1/8 finals.
 
-### Complexity of Rounds
 
-The complexity of integrals varies significantly between rounds. Early rounds often feature straightforward problems, while later rounds demand more advanced techniques. This discrepancy in difficulty necessitates weighting matches differently based on the round. Higher-stakes matches, such as semifinals and finals, have a greater impact on ratings by scaling the K-factor to reflect the significance of the round. This adjustment ensures that the ratings better represent the players' abilities in solving progressively difficult integrals.
+## Rating system
 
-### Infrequent Participation
+We use standard elo with adjustable tau and K parameters. We also adjust initial player's rating, since it remains unknown which one would suit this sport the most.
+We adjust to old-recent recent matches balance by introducing traditional for NBA decay factor. This means that over time, preferably once a season, we take all the results and make them approach the mean.
+in elo mean stays the same as initial ranking since elo represents a zero-sum ranking system.
+another adjustment planned in the future is dynamic K-factor that will allow us to introduce different round weights per round.
 
-Some players may compete only sporadically, making their ratings less reliable over time. To address this, the system incorporates a decay mechanism that periodically shifts ratings closer to the mean. This decay ensures that inactive players do not retain inflated ratings indefinitely, while active players can continually adjust their ratings based on recent performance. The decay rate is proportional to the gap between a player's rating and the mean rating of all participants, balancing fairness and accuracy.
 
-### Handling Disqualifications
+## Simulation
 
-Disqualifications present a unique challenge as they do not involve an actual match. Penalizing a disqualified player heavily could unfairly distort their rating, while ignoring the event entirely might fail to reflect the disqualification's impact. The system applies minimal adjustments in these cases, ensuring that the absence of a match does not disproportionately affect rankings while maintaining the integrity of the competition.
+in order to see how the ranking performs, we simulate tournaments with players and look at statistical data afterwards.
 
-### Margin-Based Outcomes
+### Data bias problem
 
-The magnitude of victory or defeat can provide additional nuance to rating adjustments. By incorporating margin-based outcomes, the system can reward dominant performances more heavily and reduce the impact of narrow losses. This approach refines the traditional win/loss binary outcome, making the updates more representative of actual match dynamics.
+One of the main problems is creating players and matches. If we assume random performance we neglect the entire point of ranking - to decide who performs better and who performs worse.
+Therefore some players have to perform better, some have to perform worse
 
-### Addressing Bias in Simulations
+possible solutions here are: 
+- introducing hidden "Skill" parameter, so that the players with higher skill win more often. Problem of such approach is that the way we distribute skill completely decides about the outcome
+and the entire study becomes pointless. Additionally having this skill and deciding who wins using it basically is elo, so we are using elo to simulate elo, which has even less meaning.
+- second option is the one we went for. We take real data from another sport and adjust it to fit our case. We took data that was the most available - football matches.
+data has teams and over a century matches history. this way the final distribution is affected only by nature of sports and strength of real teams, allowing us to text the system in applied field.
 
-One of the challenges in simulating an Elo system for the Integration Bee is the potential bias introduced when generating random match outcomes. To overcome this, we integrated real-world data from football matches as a proxy. By transforming football teams into players and match results into outcomes, we achieved a realistic distribution of win probabilities and skill levels. This approach ensured that the simulations reflected genuine competitive dynamics, avoiding artificially generated randomness that could skew the results. This data-driven approach also allows for better validation of the system's parameters and adjustments.
+
+## Adjustable parameters:
+
+    - k 
+    - decay_factor 
+    - initial_score 
+    - tau
+
+## Scoring
+
+to know which system performs the best a sophisticated hybrid metric was developed
+
+To evaluate which ELO system performs best, we developed a hybrid metric combining several key statistical measures:
+
+- Drift: Captures the responsiveness of the rating system to recent performances, with higher drift indicating a more dynamic system.
+- Mean Absolute Change (MAC): Reflects stability by measuring the average rating fluctuations. Lower MAC indicates a steadier system.
+- Skewness and Kurtosis: Evaluate the distribution of final ratings. Target skewness between 0 and 1.5 ensures slight positive asymmetry, while kurtosis between 3 and 5 promotes a balanced distribution.
+- Convergence: Measures how quickly player ratings stabilize over time, ensuring predictability and fairness.
+
+The combined metric balances these aspects, promoting a system that is responsive to performance changes, stable, and fair, while maintaining desirable statistical properties. Constraints ensure the metric remains within realistic bounds for effective optimization.
+
+however this doesn't ensure fulfillment of the criteria by the final metric, since it is random. We only try to find optimal one, that would approach the desirable parameters.
+
+## Optimisation
+
+To identify the most suitable parameters for our ELO system, we employ Bayesian optimization, a probabilistic model-based global optimization technique. This method is well-suited for optimizing objective functions that are expensive to evaluate or lack gradient information.
+
+Bayesian optimization builds a surrogate model, typically a Gaussian Process (GP), to approximate the objective function. The GP not only predicts the value of the function at any input but also provides uncertainty estimates. These uncertainty estimates help balance two key strategies in optimization:
+
+- Exploration: Sampling regions where the surrogate model is uncertain, to improve the model.
+- Exploitation: Focusing on regions where the surrogate model predicts high performance.
+- At each iteration, a new candidate point is chosen by maximizing an acquisition function, such as Expected Improvement (EI) or Upper Confidence Bound (UCB). The acquisition function uses both the mean and uncertainty of the GP to decide the next point to evaluate.
+
+The iterative process can be summarized as:
+
+1. Construct a surrogate model of the objective function.
+2. Maximize the acquisition function to select the next candidate.
+3. Evaluate the true objective function at the selected point.
+4. Update the surrogate model with the new data.
+5. Repeat until convergence or a predefined budget is met.
+
+Bayesian optimization is particularly effective in our context, where evaluating the ELO metric involves computationally intensive simulations. By efficiently balancing exploration and exploitation, it minimizes the number of simulations needed to identify optimal parameters, making it an ideal choice for this task.
+
+
 
 ## Implementation
 
-The simulation is implemented in Python and leverages the numpy and pandas libraries for numerical computations and data management. Players and match data are loaded from a CSV file, enabling seamless integration of historical data. The system simulates single-elimination tournaments with configurable parameters to allow experimentation with different configurations and scenarios.
-
-Configurations 
-
-The simulation supports the following configurable parameters: 
-
-- Initial Ratings: All players start with the same base rating, typically 400.
-
-- K-Factor: Controls the sensitivity of rating changes. Higher values cause ratings to change more significantly after each match.
-
-- Decay Interval: Specifies how often ratings decay toward the mean.
-
-- Decay Factor: Determines the proportion of decay applied at each interval.
-
-- Round-Dependent Weighting: Allows scaling the K-factor based on the round's significance.
-
-- Steps to Run the Simulation
+The simulation is implemented in Python and leverages various libraries for numerical computations, data management, statistics and optimisation techniques. Players and match data are loaded from a CSV file, enabling seamless integration of historical data. The system simulates single-elimination tournaments with configurable parameters to allow experimentation with different configurations and scenarios.
 
 ### Prepare the Environment: 
 Clone the repository and install the required dependencies:
 
 `git clone <repository_url>` 
 `cd <repository_name>` 
-`pip install numpy pandas` 
+`pip install -r requirements.txt` 
 
 ### Configure Simulation Parameters:
 Edit the simulate_elo function in the script to adjust parameters such as the number of players (m), participants per tournament (p), number of tournaments (n), K-factor, and decay settings.
@@ -71,7 +107,11 @@ Edit the simulate_elo function in the script to adjust parameters such as the nu
 ### Run the Simulation:
 Execute the script to simulate tournaments and update player ratings:
 
-`python elo_simulation.py`
+`python main.py`
+
+If you want to run optimization:
+
+`python optimizing.py`
 
 ### Analyze Results:
 The simulation generates an output file named player_results.txt, containing final ratings and match counts for all players.
@@ -80,9 +120,10 @@ The simulation generates an output file named player_results.txt, containing fin
 
 This project is specifically designed for the Integration Bee but has broader applications in ranking systems for competitions. By simulating tournaments, users can evaluate the effectiveness of various configurations and refine the system for accuracy and fairness. The flexibility of the code makes it suitable for adapting to different competitive scenarios beyond mathematics.
 
-## Future Directions
+## TODO
 
-Future improvements to the system will focus on integrating machine learning techniques to optimize the parameters automatically, ensuring that the system adapts to data-driven insights. Additionally, the code requires optimization to improve its efficiency, as current simulations can be slow for larger datasets. Enhancing performance will allow for more extensive experimentation and analysis.
+- Introduce dynamic K
+- Add weight of score difference
 
 ## License
 
