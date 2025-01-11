@@ -97,7 +97,7 @@ def combined_metric_with_constraints(
     """
     if weights is None:
         weights = {
-            "skew": 5.0,
+            "skew": 8.0,
             "kurtosis": 0,
             "drift": 3,
             "convergence": 1,

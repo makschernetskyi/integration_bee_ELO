@@ -1,10 +1,10 @@
 # Elo Simulation System
 
-This projects creates a sandbox for simulating elo rankings and finding the most suitable solutions for new areas where it wasn't used before. It includes not only simulation, but also experimenting with different elo and elo-like approaches, optimization for best parameters and construction of suitable metrics.
+This project creates a sandbox for simulating elo rankings and finding the most suitable solutions for new areas where it wasn't used before. It includes not only simulation, but also experimenting with different elo and elo-like approaches, optimization for best parameters and construction of suitable metrics.
 
 ## Introduction
 
-This project appeared as part of the idea to standardize Integration bees across different universities in the world. starting form integration bee austria.
+This project appeared as part of the idea to standardize Integration bees across different universities in the world. starting from integration bee Austria.
 The Integration Bee is a prestige calculus competition requiring a precise, dynamic, and fair ranking system to evaluate participants' skill levels. This project adapts the Elo rating system to address the challenges posed by such competitions, ensuring meaningful updates to player rankings after each event while maintaining a balance between long-term stability and responsiveness to recent performances.
 
 ## The Elo Rating System
@@ -43,6 +43,7 @@ therefore we have introduced dynamic K that grows towards later rounds. Neverthe
   + `linear` - K grows linearly from min to max value
   + `sqrt` - K grows proportionally to square root (Default)
   + `log` - K grows logarithmically
+  + `custom` - allows to provide custom scale for K factor
 
 ## Rating system
 
@@ -73,7 +74,10 @@ data has teams and over a century matches history. this way the final distributi
 
 ## Adjustable parameters:
 
-    - k 
+    - k
+    - k_min
+    - k_max
+    - custom_k
     - decay_factor 
     - initial_score 
     - tau

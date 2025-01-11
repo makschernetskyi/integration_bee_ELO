@@ -23,7 +23,7 @@ def create_objective_function(mode="dynamic"):
             k_min = trial.suggest_float("k_min", 10, 200)
             k_max = trial.suggest_float("k_max", 200, 800)
             #k_scaling = trial.suggest_categorical("k_scaling", ["linear", "log", "sqrt"])
-            k_scaling = "linear"
+            k_scaling = "sqrt"
             custom_k = None
             k = None
         elif mode == "static":

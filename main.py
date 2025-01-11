@@ -11,11 +11,11 @@ if __name__ == "__main__":
     p = 16   # Players per tournament
     n = 100  # Number of tournaments
     k = 298  # K-factor
-    k_min = 77.89065013918406
-    k_max = 239.38881917970338
-    decay_factor = 0.46
-    initial_score = 458
-    tau = 134.96906361018003
+    k_min = 108
+    k_max = 473
+    decay_factor = 0.45
+    initial_score = 651
+    tau = 78.96906361018003
     k_scaling = "sqrt"
 
     # Optimal
