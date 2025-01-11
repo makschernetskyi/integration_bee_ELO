@@ -15,17 +15,17 @@ The update mechanism compares this expected score with the actual outcome and ad
 
 To calculate Expected score we use following formula:
 
-<img src="https://latex.codecogs.com/svg.image?\bg{white}&space;E_A=\frac{1}{1&plus;e^{\frac{R_B-R_A}{\tau}}}" style="background-color: white;" bgcolor="#ffffff" alt="elo expected score" />
+<img src="https://latex.codecogs.com/png.image?\bg{white}&space;E_A=\frac{1}{1&plus;e^{\frac{R_B-R_A}{\tau}}}" style="background-color: white;" bgcolor="#ffffff" alt="elo expected score" />
 
 Where:
 - E<sub>A</sub> - Expected score
 - R<sub>A</sub> - Rating of the player A
 - R<sub>B</sub> - Rating of the player B
-- τ - the scaling parameter controlling sensitivity to rating differences
+- τ - Scaling parameter controlling sensitivity to rating differences
 
-and to update ratings we use following formula
+and to update ratings we use following formula:
 
-<img src="https://latex.codecogs.com/svg.image?\bg{white}R_A'=R_A&plus;K\cdot\left({S_A}-E_A\right)" style="background-color: white;" bgcolor="#ffffff" alt="elo expected score" />
+<img src="https://latex.codecogs.com/png.image?\bg{white}R_A'=R_A&plus;K\cdot\left({S_A}-E_A\right)" style="background-color: white;" bgcolor="#ffffff" alt="elo expected score" />
 
 Where:
 - S<sub>A</sub> - is the actual score/result for player A on the interval from 0 to 1
@@ -50,7 +50,7 @@ therefore we have introduced dynamic K that grows towards later rounds. Neverthe
 We use standard elo with adjustable tau and K parameters. We also adjust initial player's rating, since it remains unknown which one would suit this sport the most.
 We adjust to old-recent recent matches balance by introducing traditional for NBA decay factor. This means that over time, preferably once a season, we take all the results and make them approach the mean.
 
-<img src="https://latex.codecogs.com/svg.image?\bg{white}R_i'=R_i&plus;\text{decay\_factor}\cdot(\bar{R}-R_i)" style="background-color: white;" bgcolor="#ffffff" alt="elo expected score" />
+<img src="https://latex.codecogs.com/png.image?\inline&space;\large&space;\dpi{120}\bg{white}&space;R_i'=R_i&plus;\text{decay\_factor}\cdot(\bar{R}-R_i)" alt="elo expected score" />
 
 - In elo mean stays the same as initial ranking since elo represents a zero-sum ranking system.
 
