@@ -11,23 +11,23 @@ if __name__ == "__main__":
     p = 16   # Players per tournament
     n = 100  # Number of tournaments
     k = 298  # K-factor
-    k_min = 108
-    k_max = 473
-    decay_factor = 0.45
-    initial_score = 651
-    tau = 78.96906361018003
+    k_min = 31
+    k_max = 689
+    decay_factor = 0.42
+    initial_score = 558
+    tau = 180
     k_scaling = "sqrt"
 
     # Optimal
     # Parameters:
-    # k_min: 77.2462689286173
-    # k_max: 239.10325082909344
-    # decay_factor: 0.4616222104959444
-    # initial_score: 458
-    # tau: 134.20290416221096
+    # k_min: 31.394278644353776
+    # k_max: 689.9999590760938
+    # decay_factor: 0.4272370276873543
+    # initial_score: 558
+    # tau: 179.69165663105943
     # Best
     # Metric
-    # Score: 75.4955
+    # Score: 92.6332
 
     # Start timing
     start_time = time.time()
