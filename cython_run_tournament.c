@@ -1939,6 +1939,62 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
 
+/* IncludeStringH.proto */
+#include <string.h>
+
+/* BytesEquals.proto */
+static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
+
+/* UnicodeEquals.proto */
+static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
+
+/* PyDictVersioning.proto */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
+#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
+    (version_var) = __PYX_GET_DICT_VERSION(dict);\
+    (cache_var) = (value);
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
+        (VAR) = __pyx_dict_cached_value;\
+    } else {\
+        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
+        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
+    }\
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
+#else
+#define __PYX_GET_DICT_VERSION(dict)  (0)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
+#endif
+
+/* GetModuleGlobalName.proto */
+#if CYTHON_USE_DICT_VERSIONS
+#define __Pyx_GetModuleGlobalName(var, name)  do {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
+        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
+        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
+} while(0)
+#define __Pyx_GetModuleGlobalNameUncached(var, name)  do {\
+    PY_UINT64_T __pyx_dict_version;\
+    PyObject *__pyx_dict_cached_value;\
+    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
+} while(0)
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
+#else
+#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
+#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
+#endif
+
 /* PyFunctionFastCall.proto */
 #if CYTHON_FAST_PYCALL
 #if !CYTHON_VECTORCALL
@@ -1988,15 +2044,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_FastCallDict(PyObject *func, PyObj
 static CYTHON_INLINE PyObject* __Pyx_PyList_FromArray(PyObject *const *src, Py_ssize_t n);
 static CYTHON_INLINE PyObject* __Pyx_PyTuple_FromArray(PyObject *const *src, Py_ssize_t n);
 #endif
-
-/* IncludeStringH.proto */
-#include <string.h>
-
-/* BytesEquals.proto */
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
-
-/* UnicodeEquals.proto */
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
 
 /* fastcall.proto */
 #if CYTHON_AVOID_BORROWED_REFS
@@ -2065,53 +2112,6 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject *const *kwvalues
     ((likely(__Pyx_IS_TYPE(obj, type) | (none_allowed && (obj == Py_None)))) ? 1 :\
         __Pyx__ArgTypeTest(obj, type, name, exact))
 static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
-
-/* PyDictVersioning.proto */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
-#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
-    (version_var) = __PYX_GET_DICT_VERSION(dict);\
-    (cache_var) = (value);
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
-        (VAR) = __pyx_dict_cached_value;\
-    } else {\
-        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
-        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
-    }\
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
-#else
-#define __PYX_GET_DICT_VERSION(dict)  (0)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
-#endif
-
-/* GetModuleGlobalName.proto */
-#if CYTHON_USE_DICT_VERSIONS
-#define __Pyx_GetModuleGlobalName(var, name)  do {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
-        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
-        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-} while(0)
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  do {\
-    PY_UINT64_T __pyx_dict_version;\
-    PyObject *__pyx_dict_cached_value;\
-    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-} while(0)
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
-#else
-#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
-#endif
 
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
@@ -2195,6 +2195,14 @@ static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
 }
 #else
 #define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
+#endif
+
+/* PyIntBinop.proto */
+#if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_SubtractCObj(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
+#else
+#define __Pyx_PyInt_SubtractCObj(op1, op2, intval, inplace, zerodivision_check)\
+    (inplace ? PyNumber_InPlaceSubtract(op1, op2) : PyNumber_Subtract(op1, op2))
 #endif
 
 /* TypeImport.proto */
@@ -2546,6 +2554,9 @@ static void __Pyx_AddTraceback(const char *funcname, int c_line,
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 /* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
+
+/* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 /* FormatTypeName.proto */
@@ -2560,9 +2571,6 @@ typedef const char *__Pyx_TypeName;
 #define __Pyx_PyType_GetName(tp) ((tp)->tp_name)
 #define __Pyx_DECREF_TypeName(obj)
 #endif
-
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
@@ -2633,7 +2641,8 @@ static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__p
 /* Module declarations from "player" */
 
 /* Module declarations from "cython_run_tournament" */
-static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_Player *, struct __pyx_obj_6player_Player *, double, PyObject *); /*proto*/
+static double __pyx_f_21cython_run_tournament_dynamic_k(int, int, double, double, PyObject *); /*proto*/
+static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_Player *, struct __pyx_obj_6player_Player *, double, PyObject *, double); /*proto*/
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
 #define __Pyx_MODULE_NAME "cython_run_tournament"
@@ -2642,43 +2651,63 @@ int __pyx_module_is_main_cython_run_tournament = 0;
 
 /* Implementation of "cython_run_tournament" */
 /* #### Code section: global_var ### */
+static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ImportError;
 /* #### Code section: string_decls ### */
 static const char __pyx_k_i[] = "i";
 static const char __pyx_k_k[] = "k";
 static const char __pyx_k_p[] = "p";
-static const char __pyx_k__3[] = "*";
-static const char __pyx_k__6[] = "?";
+static const char __pyx_k_v[] = "v";
+static const char __pyx_k__5[] = "*";
+static const char __pyx_k__8[] = "?";
 static const char __pyx_k_np[] = "np";
+static const char __pyx_k_log[] = "log";
 static const char __pyx_k_rng[] = "rng";
+static const char __pyx_k_ceil[] = "ceil";
+static const char __pyx_k_log2[] = "log2";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_size[] = "size";
 static const char __pyx_k_spec[] = "__spec__";
+static const char __pyx_k_sqrt[] = "sqrt";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_k_max[] = "k_max";
+static const char __pyx_k_k_min[] = "k_min";
 static const char __pyx_k_numpy[] = "numpy";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_choice[] = "choice";
+static const char __pyx_k_custom[] = "custom";
 static const char __pyx_k_import[] = "__import__";
+static const char __pyx_k_linear[] = "linear";
 static const char __pyx_k_random[] = "random";
+static const char __pyx_k_static[] = "static";
 static const char __pyx_k_tolist[] = "tolist";
 static const char __pyx_k_history[] = "history";
 static const char __pyx_k_players[] = "players";
 static const char __pyx_k_replace[] = "replace";
+static const char __pyx_k_custom_k[] = "custom_k";
 static const char __pyx_k_integers[] = "integers";
 static const char __pyx_k_player_1[] = "player_1";
 static const char __pyx_k_player_2[] = "player_2";
+static const char __pyx_k_current_k[] = "current_k";
+static const char __pyx_k_k_scaling[] = "k_scaling";
+static const char __pyx_k_ValueError[] = "ValueError";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_Loser_Score[] = "Loser_Score";
 static const char __pyx_k_default_rng[] = "default_rng";
 static const char __pyx_k_elo_formula[] = "elo_formula";
 static const char __pyx_k_is_1_winner[] = "is_1_winner";
+static const char __pyx_k_loser_score[] = "loser_score";
 static const char __pyx_k_Winner_Score[] = "Winner_Score";
 static const char __pyx_k_initializing[] = "_initializing";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
 static const char __pyx_k_participants[] = "participants";
+static const char __pyx_k_round_number[] = "round_number";
+static const char __pyx_k_total_rounds[] = "total_rounds";
+static const char __pyx_k_winner_score[] = "winner_score";
 static const char __pyx_k_class_getitem[] = "__class_getitem__";
+static const char __pyx_k_match_outcome[] = "match_outcome";
 static const char __pyx_k_update_rating[] = "update_rating";
 static const char __pyx_k_run_tournament[] = "run_tournament";
 static const char __pyx_k_len_participants[] = "len_participants";
@@ -2687,10 +2716,12 @@ static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_cython_run_tournament[] = "cython_run_tournament";
 static const char __pyx_k_cython_run_tournament_pyx[] = "cython_run_tournament.pyx";
+static const char __pyx_k_Custom_K_array_is_smaller_than_t[] = "Custom K array is smaller than the total number of rounds.";
+static const char __pyx_k_Invalid_scaling_method_for_dynam[] = "Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.";
 static const char __pyx_k_numpy__core_multiarray_failed_to[] = "numpy._core.multiarray failed to import";
 static const char __pyx_k_numpy__core_umath_failed_to_impo[] = "numpy._core.umath failed to import";
 /* #### Code section: decls ### */
-static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_players, double __pyx_v_k, int __pyx_v_p, PyObject *__pyx_v_history, PyObject *__pyx_v_elo_formula); /* proto */
+static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_players, int __pyx_v_p, PyObject *__pyx_v_history, PyObject *__pyx_v_elo_formula, int __pyx_v_v, PyObject *__pyx_v_k_scaling, double __pyx_v_k, double __pyx_v_k_min, double __pyx_v_k_max, PyObject *__pyx_v_custom_k); /* proto */
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 typedef struct {
@@ -2757,15 +2788,22 @@ typedef struct {
   PyTypeObject *__pyx_ptype_6player_Player;
   #if CYTHON_USE_MODULE_STATE
   #endif
+  PyObject *__pyx_kp_u_Custom_K_array_is_smaller_than_t;
   PyObject *__pyx_n_s_ImportError;
+  PyObject *__pyx_kp_u_Invalid_scaling_method_for_dynam;
   PyObject *__pyx_n_u_Loser_Score;
+  PyObject *__pyx_n_s_ValueError;
   PyObject *__pyx_n_u_Winner_Score;
-  PyObject *__pyx_n_s__3;
-  PyObject *__pyx_n_s__6;
+  PyObject *__pyx_n_s__5;
+  PyObject *__pyx_n_s__8;
   PyObject *__pyx_n_s_asyncio_coroutines;
+  PyObject *__pyx_n_s_ceil;
   PyObject *__pyx_n_s_choice;
   PyObject *__pyx_n_s_class_getitem;
   PyObject *__pyx_n_s_cline_in_traceback;
+  PyObject *__pyx_n_s_current_k;
+  PyObject *__pyx_n_u_custom;
+  PyObject *__pyx_n_s_custom_k;
   PyObject *__pyx_n_s_cython_run_tournament;
   PyObject *__pyx_kp_s_cython_run_tournament_pyx;
   PyObject *__pyx_n_s_default_rng;
@@ -2778,8 +2816,16 @@ typedef struct {
   PyObject *__pyx_n_s_is_1_winner;
   PyObject *__pyx_n_s_is_coroutine;
   PyObject *__pyx_n_s_k;
+  PyObject *__pyx_n_s_k_max;
+  PyObject *__pyx_n_s_k_min;
+  PyObject *__pyx_n_s_k_scaling;
   PyObject *__pyx_n_s_len_participants;
+  PyObject *__pyx_n_u_linear;
+  PyObject *__pyx_n_u_log;
+  PyObject *__pyx_n_s_log2;
+  PyObject *__pyx_n_s_loser_score;
   PyObject *__pyx_n_s_main;
+  PyObject *__pyx_n_s_match_outcome;
   PyObject *__pyx_n_s_name;
   PyObject *__pyx_n_s_next_participants;
   PyObject *__pyx_n_s_np;
@@ -2795,19 +2841,28 @@ typedef struct {
   PyObject *__pyx_n_s_range;
   PyObject *__pyx_n_s_replace;
   PyObject *__pyx_n_s_rng;
+  PyObject *__pyx_n_s_round_number;
   PyObject *__pyx_n_s_run_tournament;
   PyObject *__pyx_n_s_size;
   PyObject *__pyx_n_s_spec;
+  PyObject *__pyx_n_s_sqrt;
+  PyObject *__pyx_n_u_sqrt;
+  PyObject *__pyx_n_u_static;
   PyObject *__pyx_n_s_test;
   PyObject *__pyx_n_s_tolist;
+  PyObject *__pyx_n_s_total_rounds;
   PyObject *__pyx_n_s_update_rating;
+  PyObject *__pyx_n_s_v;
+  PyObject *__pyx_n_s_winner_score;
   PyObject *__pyx_int_0;
   PyObject *__pyx_int_1;
   PyObject *__pyx_int_2;
   PyObject *__pyx_tuple_;
   PyObject *__pyx_tuple__2;
+  PyObject *__pyx_tuple__3;
   PyObject *__pyx_tuple__4;
-  PyObject *__pyx_codeobj__5;
+  PyObject *__pyx_tuple__6;
+  PyObject *__pyx_codeobj__7;
 } __pyx_mstate;
 
 #if CYTHON_USE_MODULE_STATE
@@ -2867,15 +2922,22 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_character);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_ufunc);
   Py_CLEAR(clear_module_state->__pyx_ptype_6player_Player);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_Custom_K_array_is_smaller_than_t);
   Py_CLEAR(clear_module_state->__pyx_n_s_ImportError);
+  Py_CLEAR(clear_module_state->__pyx_kp_u_Invalid_scaling_method_for_dynam);
   Py_CLEAR(clear_module_state->__pyx_n_u_Loser_Score);
+  Py_CLEAR(clear_module_state->__pyx_n_s_ValueError);
   Py_CLEAR(clear_module_state->__pyx_n_u_Winner_Score);
-  Py_CLEAR(clear_module_state->__pyx_n_s__3);
-  Py_CLEAR(clear_module_state->__pyx_n_s__6);
+  Py_CLEAR(clear_module_state->__pyx_n_s__5);
+  Py_CLEAR(clear_module_state->__pyx_n_s__8);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_CLEAR(clear_module_state->__pyx_n_s_ceil);
   Py_CLEAR(clear_module_state->__pyx_n_s_choice);
   Py_CLEAR(clear_module_state->__pyx_n_s_class_getitem);
   Py_CLEAR(clear_module_state->__pyx_n_s_cline_in_traceback);
+  Py_CLEAR(clear_module_state->__pyx_n_s_current_k);
+  Py_CLEAR(clear_module_state->__pyx_n_u_custom);
+  Py_CLEAR(clear_module_state->__pyx_n_s_custom_k);
   Py_CLEAR(clear_module_state->__pyx_n_s_cython_run_tournament);
   Py_CLEAR(clear_module_state->__pyx_kp_s_cython_run_tournament_pyx);
   Py_CLEAR(clear_module_state->__pyx_n_s_default_rng);
@@ -2888,8 +2950,16 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_is_1_winner);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_coroutine);
   Py_CLEAR(clear_module_state->__pyx_n_s_k);
+  Py_CLEAR(clear_module_state->__pyx_n_s_k_max);
+  Py_CLEAR(clear_module_state->__pyx_n_s_k_min);
+  Py_CLEAR(clear_module_state->__pyx_n_s_k_scaling);
   Py_CLEAR(clear_module_state->__pyx_n_s_len_participants);
+  Py_CLEAR(clear_module_state->__pyx_n_u_linear);
+  Py_CLEAR(clear_module_state->__pyx_n_u_log);
+  Py_CLEAR(clear_module_state->__pyx_n_s_log2);
+  Py_CLEAR(clear_module_state->__pyx_n_s_loser_score);
   Py_CLEAR(clear_module_state->__pyx_n_s_main);
+  Py_CLEAR(clear_module_state->__pyx_n_s_match_outcome);
   Py_CLEAR(clear_module_state->__pyx_n_s_name);
   Py_CLEAR(clear_module_state->__pyx_n_s_next_participants);
   Py_CLEAR(clear_module_state->__pyx_n_s_np);
@@ -2905,19 +2975,28 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_range);
   Py_CLEAR(clear_module_state->__pyx_n_s_replace);
   Py_CLEAR(clear_module_state->__pyx_n_s_rng);
+  Py_CLEAR(clear_module_state->__pyx_n_s_round_number);
   Py_CLEAR(clear_module_state->__pyx_n_s_run_tournament);
   Py_CLEAR(clear_module_state->__pyx_n_s_size);
   Py_CLEAR(clear_module_state->__pyx_n_s_spec);
+  Py_CLEAR(clear_module_state->__pyx_n_s_sqrt);
+  Py_CLEAR(clear_module_state->__pyx_n_u_sqrt);
+  Py_CLEAR(clear_module_state->__pyx_n_u_static);
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
   Py_CLEAR(clear_module_state->__pyx_n_s_tolist);
+  Py_CLEAR(clear_module_state->__pyx_n_s_total_rounds);
   Py_CLEAR(clear_module_state->__pyx_n_s_update_rating);
+  Py_CLEAR(clear_module_state->__pyx_n_s_v);
+  Py_CLEAR(clear_module_state->__pyx_n_s_winner_score);
   Py_CLEAR(clear_module_state->__pyx_int_0);
   Py_CLEAR(clear_module_state->__pyx_int_1);
   Py_CLEAR(clear_module_state->__pyx_int_2);
   Py_CLEAR(clear_module_state->__pyx_tuple_);
   Py_CLEAR(clear_module_state->__pyx_tuple__2);
+  Py_CLEAR(clear_module_state->__pyx_tuple__3);
   Py_CLEAR(clear_module_state->__pyx_tuple__4);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__5);
+  Py_CLEAR(clear_module_state->__pyx_tuple__6);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__7);
   return 0;
 }
 #endif
@@ -2955,15 +3034,22 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_character);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_ufunc);
   Py_VISIT(traverse_module_state->__pyx_ptype_6player_Player);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_Custom_K_array_is_smaller_than_t);
   Py_VISIT(traverse_module_state->__pyx_n_s_ImportError);
+  Py_VISIT(traverse_module_state->__pyx_kp_u_Invalid_scaling_method_for_dynam);
   Py_VISIT(traverse_module_state->__pyx_n_u_Loser_Score);
+  Py_VISIT(traverse_module_state->__pyx_n_s_ValueError);
   Py_VISIT(traverse_module_state->__pyx_n_u_Winner_Score);
-  Py_VISIT(traverse_module_state->__pyx_n_s__3);
-  Py_VISIT(traverse_module_state->__pyx_n_s__6);
+  Py_VISIT(traverse_module_state->__pyx_n_s__5);
+  Py_VISIT(traverse_module_state->__pyx_n_s__8);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_VISIT(traverse_module_state->__pyx_n_s_ceil);
   Py_VISIT(traverse_module_state->__pyx_n_s_choice);
   Py_VISIT(traverse_module_state->__pyx_n_s_class_getitem);
   Py_VISIT(traverse_module_state->__pyx_n_s_cline_in_traceback);
+  Py_VISIT(traverse_module_state->__pyx_n_s_current_k);
+  Py_VISIT(traverse_module_state->__pyx_n_u_custom);
+  Py_VISIT(traverse_module_state->__pyx_n_s_custom_k);
   Py_VISIT(traverse_module_state->__pyx_n_s_cython_run_tournament);
   Py_VISIT(traverse_module_state->__pyx_kp_s_cython_run_tournament_pyx);
   Py_VISIT(traverse_module_state->__pyx_n_s_default_rng);
@@ -2976,8 +3062,16 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_is_1_winner);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_coroutine);
   Py_VISIT(traverse_module_state->__pyx_n_s_k);
+  Py_VISIT(traverse_module_state->__pyx_n_s_k_max);
+  Py_VISIT(traverse_module_state->__pyx_n_s_k_min);
+  Py_VISIT(traverse_module_state->__pyx_n_s_k_scaling);
   Py_VISIT(traverse_module_state->__pyx_n_s_len_participants);
+  Py_VISIT(traverse_module_state->__pyx_n_u_linear);
+  Py_VISIT(traverse_module_state->__pyx_n_u_log);
+  Py_VISIT(traverse_module_state->__pyx_n_s_log2);
+  Py_VISIT(traverse_module_state->__pyx_n_s_loser_score);
   Py_VISIT(traverse_module_state->__pyx_n_s_main);
+  Py_VISIT(traverse_module_state->__pyx_n_s_match_outcome);
   Py_VISIT(traverse_module_state->__pyx_n_s_name);
   Py_VISIT(traverse_module_state->__pyx_n_s_next_participants);
   Py_VISIT(traverse_module_state->__pyx_n_s_np);
@@ -2993,19 +3087,28 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_range);
   Py_VISIT(traverse_module_state->__pyx_n_s_replace);
   Py_VISIT(traverse_module_state->__pyx_n_s_rng);
+  Py_VISIT(traverse_module_state->__pyx_n_s_round_number);
   Py_VISIT(traverse_module_state->__pyx_n_s_run_tournament);
   Py_VISIT(traverse_module_state->__pyx_n_s_size);
   Py_VISIT(traverse_module_state->__pyx_n_s_spec);
+  Py_VISIT(traverse_module_state->__pyx_n_s_sqrt);
+  Py_VISIT(traverse_module_state->__pyx_n_u_sqrt);
+  Py_VISIT(traverse_module_state->__pyx_n_u_static);
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
   Py_VISIT(traverse_module_state->__pyx_n_s_tolist);
+  Py_VISIT(traverse_module_state->__pyx_n_s_total_rounds);
   Py_VISIT(traverse_module_state->__pyx_n_s_update_rating);
+  Py_VISIT(traverse_module_state->__pyx_n_s_v);
+  Py_VISIT(traverse_module_state->__pyx_n_s_winner_score);
   Py_VISIT(traverse_module_state->__pyx_int_0);
   Py_VISIT(traverse_module_state->__pyx_int_1);
   Py_VISIT(traverse_module_state->__pyx_int_2);
   Py_VISIT(traverse_module_state->__pyx_tuple_);
   Py_VISIT(traverse_module_state->__pyx_tuple__2);
+  Py_VISIT(traverse_module_state->__pyx_tuple__3);
   Py_VISIT(traverse_module_state->__pyx_tuple__4);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__5);
+  Py_VISIT(traverse_module_state->__pyx_tuple__6);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__7);
   return 0;
 }
 #endif
@@ -3073,15 +3176,22 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_ptype_6player_Player __pyx_mstate_global->__pyx_ptype_6player_Player
 #if CYTHON_USE_MODULE_STATE
 #endif
+#define __pyx_kp_u_Custom_K_array_is_smaller_than_t __pyx_mstate_global->__pyx_kp_u_Custom_K_array_is_smaller_than_t
 #define __pyx_n_s_ImportError __pyx_mstate_global->__pyx_n_s_ImportError
+#define __pyx_kp_u_Invalid_scaling_method_for_dynam __pyx_mstate_global->__pyx_kp_u_Invalid_scaling_method_for_dynam
 #define __pyx_n_u_Loser_Score __pyx_mstate_global->__pyx_n_u_Loser_Score
+#define __pyx_n_s_ValueError __pyx_mstate_global->__pyx_n_s_ValueError
 #define __pyx_n_u_Winner_Score __pyx_mstate_global->__pyx_n_u_Winner_Score
-#define __pyx_n_s__3 __pyx_mstate_global->__pyx_n_s__3
-#define __pyx_n_s__6 __pyx_mstate_global->__pyx_n_s__6
+#define __pyx_n_s__5 __pyx_mstate_global->__pyx_n_s__5
+#define __pyx_n_s__8 __pyx_mstate_global->__pyx_n_s__8
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
+#define __pyx_n_s_ceil __pyx_mstate_global->__pyx_n_s_ceil
 #define __pyx_n_s_choice __pyx_mstate_global->__pyx_n_s_choice
 #define __pyx_n_s_class_getitem __pyx_mstate_global->__pyx_n_s_class_getitem
 #define __pyx_n_s_cline_in_traceback __pyx_mstate_global->__pyx_n_s_cline_in_traceback
+#define __pyx_n_s_current_k __pyx_mstate_global->__pyx_n_s_current_k
+#define __pyx_n_u_custom __pyx_mstate_global->__pyx_n_u_custom
+#define __pyx_n_s_custom_k __pyx_mstate_global->__pyx_n_s_custom_k
 #define __pyx_n_s_cython_run_tournament __pyx_mstate_global->__pyx_n_s_cython_run_tournament
 #define __pyx_kp_s_cython_run_tournament_pyx __pyx_mstate_global->__pyx_kp_s_cython_run_tournament_pyx
 #define __pyx_n_s_default_rng __pyx_mstate_global->__pyx_n_s_default_rng
@@ -3094,8 +3204,16 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_is_1_winner __pyx_mstate_global->__pyx_n_s_is_1_winner
 #define __pyx_n_s_is_coroutine __pyx_mstate_global->__pyx_n_s_is_coroutine
 #define __pyx_n_s_k __pyx_mstate_global->__pyx_n_s_k
+#define __pyx_n_s_k_max __pyx_mstate_global->__pyx_n_s_k_max
+#define __pyx_n_s_k_min __pyx_mstate_global->__pyx_n_s_k_min
+#define __pyx_n_s_k_scaling __pyx_mstate_global->__pyx_n_s_k_scaling
 #define __pyx_n_s_len_participants __pyx_mstate_global->__pyx_n_s_len_participants
+#define __pyx_n_u_linear __pyx_mstate_global->__pyx_n_u_linear
+#define __pyx_n_u_log __pyx_mstate_global->__pyx_n_u_log
+#define __pyx_n_s_log2 __pyx_mstate_global->__pyx_n_s_log2
+#define __pyx_n_s_loser_score __pyx_mstate_global->__pyx_n_s_loser_score
 #define __pyx_n_s_main __pyx_mstate_global->__pyx_n_s_main
+#define __pyx_n_s_match_outcome __pyx_mstate_global->__pyx_n_s_match_outcome
 #define __pyx_n_s_name __pyx_mstate_global->__pyx_n_s_name
 #define __pyx_n_s_next_participants __pyx_mstate_global->__pyx_n_s_next_participants
 #define __pyx_n_s_np __pyx_mstate_global->__pyx_n_s_np
@@ -3111,19 +3229,28 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_range __pyx_mstate_global->__pyx_n_s_range
 #define __pyx_n_s_replace __pyx_mstate_global->__pyx_n_s_replace
 #define __pyx_n_s_rng __pyx_mstate_global->__pyx_n_s_rng
+#define __pyx_n_s_round_number __pyx_mstate_global->__pyx_n_s_round_number
 #define __pyx_n_s_run_tournament __pyx_mstate_global->__pyx_n_s_run_tournament
 #define __pyx_n_s_size __pyx_mstate_global->__pyx_n_s_size
 #define __pyx_n_s_spec __pyx_mstate_global->__pyx_n_s_spec
+#define __pyx_n_s_sqrt __pyx_mstate_global->__pyx_n_s_sqrt
+#define __pyx_n_u_sqrt __pyx_mstate_global->__pyx_n_u_sqrt
+#define __pyx_n_u_static __pyx_mstate_global->__pyx_n_u_static
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
 #define __pyx_n_s_tolist __pyx_mstate_global->__pyx_n_s_tolist
+#define __pyx_n_s_total_rounds __pyx_mstate_global->__pyx_n_s_total_rounds
 #define __pyx_n_s_update_rating __pyx_mstate_global->__pyx_n_s_update_rating
+#define __pyx_n_s_v __pyx_mstate_global->__pyx_n_s_v
+#define __pyx_n_s_winner_score __pyx_mstate_global->__pyx_n_s_winner_score
 #define __pyx_int_0 __pyx_mstate_global->__pyx_int_0
 #define __pyx_int_1 __pyx_mstate_global->__pyx_int_1
 #define __pyx_int_2 __pyx_mstate_global->__pyx_int_2
 #define __pyx_tuple_ __pyx_mstate_global->__pyx_tuple_
 #define __pyx_tuple__2 __pyx_mstate_global->__pyx_tuple__2
+#define __pyx_tuple__3 __pyx_mstate_global->__pyx_tuple__3
 #define __pyx_tuple__4 __pyx_mstate_global->__pyx_tuple__4
-#define __pyx_codeobj__5 __pyx_mstate_global->__pyx_codeobj__5
+#define __pyx_tuple__6 __pyx_mstate_global->__pyx_tuple__6
+#define __pyx_codeobj__7 __pyx_mstate_global->__pyx_codeobj__7
 /* #### Code section: module_code ### */
 
 /* "venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":287
@@ -4816,15 +4943,329 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
   return __pyx_r;
 }
 
-/* "cython_run_tournament.pyx":8
+/* "cython_run_tournament.pyx":7
+ * from player cimport Player  # Import Player class from an external file
  * 
+ * cdef double dynamic_k(int round_num, int total_rounds, double k_min, double k_max, str scaling):             # <<<<<<<<<<<<<<
+ *     """
+ *     Calculate the dynamic K value based on the round number and scaling method.
+ */
+
+static double __pyx_f_21cython_run_tournament_dynamic_k(int __pyx_v_round_num, int __pyx_v_total_rounds, double __pyx_v_k_min, double __pyx_v_k_max, PyObject *__pyx_v_scaling) {
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  long __pyx_t_2;
+  long __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
+  unsigned int __pyx_t_9;
+  PyObject *__pyx_t_10 = NULL;
+  double __pyx_t_11;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("dynamic_k", 1);
+
+  /* "cython_run_tournament.pyx":21
+ *         double: K-factor for the current round.
+ *     """
+ *     if scaling == "linear":             # <<<<<<<<<<<<<<
+ *         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)
+ *     elif scaling == "log":
+ */
+  __pyx_t_1 = (__Pyx_PyUnicode_Equals(__pyx_v_scaling, __pyx_n_u_linear, Py_EQ)); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 21, __pyx_L1_error)
+  if (__pyx_t_1) {
+
+    /* "cython_run_tournament.pyx":22
+ *     """
+ *     if scaling == "linear":
+ *         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)             # <<<<<<<<<<<<<<
+ *     elif scaling == "log":
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)
+ */
+    __pyx_t_2 = (__pyx_v_round_num - 1);
+    __pyx_t_3 = (__pyx_v_total_rounds - 1);
+    if (unlikely(__pyx_t_3 == 0)) {
+      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+      __PYX_ERR(0, 22, __pyx_L1_error)
+    }
+    __pyx_r = (__pyx_v_k_min + ((((double)__pyx_t_2) / ((double)__pyx_t_3)) * (__pyx_v_k_max - __pyx_v_k_min)));
+    goto __pyx_L0;
+
+    /* "cython_run_tournament.pyx":21
+ *         double: K-factor for the current round.
+ *     """
+ *     if scaling == "linear":             # <<<<<<<<<<<<<<
+ *         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)
+ *     elif scaling == "log":
+ */
+  }
+
+  /* "cython_run_tournament.pyx":23
+ *     if scaling == "linear":
+ *         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)
+ *     elif scaling == "log":             # <<<<<<<<<<<<<<
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)
+ *     elif scaling == "sqrt":
+ */
+  __pyx_t_1 = (__Pyx_PyUnicode_Equals(__pyx_v_scaling, __pyx_n_u_log, Py_EQ)); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 23, __pyx_L1_error)
+  if (__pyx_t_1) {
+
+    /* "cython_run_tournament.pyx":24
+ *         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)
+ *     elif scaling == "log":
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)             # <<<<<<<<<<<<<<
+ *     elif scaling == "sqrt":
+ *         return k_min + np.sqrt(round_num) / np.sqrt(total_rounds) * (k_max - k_min)
+ */
+    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_k_min); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_log2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_6 = __Pyx_PyInt_From_long((__pyx_v_round_num + 1)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_8 = NULL;
+    __pyx_t_9 = 0;
+    #if CYTHON_UNPACK_METHODS
+    if (unlikely(PyMethod_Check(__pyx_t_7))) {
+      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
+      if (likely(__pyx_t_8)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
+        __Pyx_INCREF(__pyx_t_8);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_7, function);
+        __pyx_t_9 = 1;
+      }
+    }
+    #endif
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_8, __pyx_t_6};
+      __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 24, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    }
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_log2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_6 = __Pyx_PyInt_From_long((__pyx_v_total_rounds + 1)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_10 = NULL;
+    __pyx_t_9 = 0;
+    #if CYTHON_UNPACK_METHODS
+    if (unlikely(PyMethod_Check(__pyx_t_8))) {
+      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_8);
+      if (likely(__pyx_t_10)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
+        __Pyx_INCREF(__pyx_t_10);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_8, function);
+        __pyx_t_9 = 1;
+      }
+    }
+    #endif
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_t_6};
+      __pyx_t_7 = __Pyx_PyObject_FastCall(__pyx_t_8, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 24, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    }
+    __pyx_t_8 = __Pyx_PyNumber_Divide(__pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __pyx_t_7 = PyFloat_FromDouble((__pyx_v_k_max - __pyx_v_k_min)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __pyx_t_7 = PyNumber_Add(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __pyx_r = __pyx_t_11;
+    goto __pyx_L0;
+
+    /* "cython_run_tournament.pyx":23
+ *     if scaling == "linear":
+ *         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)
+ *     elif scaling == "log":             # <<<<<<<<<<<<<<
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)
+ *     elif scaling == "sqrt":
+ */
+  }
+
+  /* "cython_run_tournament.pyx":25
+ *     elif scaling == "log":
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)
+ *     elif scaling == "sqrt":             # <<<<<<<<<<<<<<
+ *         return k_min + np.sqrt(round_num) / np.sqrt(total_rounds) * (k_max - k_min)
+ *     else:
+ */
+  __pyx_t_1 = (__Pyx_PyUnicode_Equals(__pyx_v_scaling, __pyx_n_u_sqrt, Py_EQ)); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 25, __pyx_L1_error)
+  if (likely(__pyx_t_1)) {
+
+    /* "cython_run_tournament.pyx":26
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)
+ *     elif scaling == "sqrt":
+ *         return k_min + np.sqrt(round_num) / np.sqrt(total_rounds) * (k_max - k_min)             # <<<<<<<<<<<<<<
+ *     else:
+ *         raise ValueError("Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.")
+ */
+    __pyx_t_7 = PyFloat_FromDouble(__pyx_v_k_min); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_round_num); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_6 = NULL;
+    __pyx_t_9 = 0;
+    #if CYTHON_UNPACK_METHODS
+    if (unlikely(PyMethod_Check(__pyx_t_8))) {
+      __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_8);
+      if (likely(__pyx_t_6)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
+        __Pyx_INCREF(__pyx_t_6);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_8, function);
+        __pyx_t_9 = 1;
+      }
+    }
+    #endif
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_t_4};
+      __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_8, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 26, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    }
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_total_rounds); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_10 = NULL;
+    __pyx_t_9 = 0;
+    #if CYTHON_UNPACK_METHODS
+    if (unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_10)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_10);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+        __pyx_t_9 = 1;
+      }
+    }
+    #endif
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_t_4};
+      __pyx_t_8 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_9, 1+__pyx_t_9);
+      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 26, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    }
+    __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_t_5, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_8 = PyFloat_FromDouble((__pyx_v_k_max - __pyx_v_k_min)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_8 = PyNumber_Add(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_8); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 26, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_r = __pyx_t_11;
+    goto __pyx_L0;
+
+    /* "cython_run_tournament.pyx":25
+ *     elif scaling == "log":
+ *         return k_min + np.log2(round_num + 1) / np.log2(total_rounds + 1) * (k_max - k_min)
+ *     elif scaling == "sqrt":             # <<<<<<<<<<<<<<
+ *         return k_min + np.sqrt(round_num) / np.sqrt(total_rounds) * (k_max - k_min)
+ *     else:
+ */
+  }
+
+  /* "cython_run_tournament.pyx":28
+ *         return k_min + np.sqrt(round_num) / np.sqrt(total_rounds) * (k_max - k_min)
+ *     else:
+ *         raise ValueError("Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.")             # <<<<<<<<<<<<<<
  * 
- * cdef void update_elo(Player winner, Player loser, double k, object elo_formula):             # <<<<<<<<<<<<<<
+ * cdef void update_elo(Player winner, Player loser, double k, object elo_formula, double match_outcome):
+ */
+  /*else*/ {
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 28, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_Raise(__pyx_t_8, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __PYX_ERR(0, 28, __pyx_L1_error)
+  }
+
+  /* "cython_run_tournament.pyx":7
+ * from player cimport Player  # Import Player class from an external file
+ * 
+ * cdef double dynamic_k(int round_num, int total_rounds, double k_min, double k_max, str scaling):             # <<<<<<<<<<<<<<
+ *     """
+ *     Calculate the dynamic K value based on the round number and scaling method.
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_XDECREF(__pyx_t_10);
+  __Pyx_AddTraceback("cython_run_tournament.dynamic_k", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "cython_run_tournament.pyx":30
+ *         raise ValueError("Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.")
+ * 
+ * cdef void update_elo(Player winner, Player loser, double k, object elo_formula, double match_outcome):             # <<<<<<<<<<<<<<
  *     """
  *     Update Elo ratings for the winner and loser based on the Elo formula.
  */
 
-static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_Player *__pyx_v_winner, struct __pyx_obj_6player_Player *__pyx_v_loser, double __pyx_v_k, PyObject *__pyx_v_elo_formula) {
+static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_Player *__pyx_v_winner, struct __pyx_obj_6player_Player *__pyx_v_loser, double __pyx_v_k, PyObject *__pyx_v_elo_formula, double __pyx_v_match_outcome) {
   double __pyx_v_expected_w;
   double __pyx_v_expected_l;
   __Pyx_RefNannyDeclarations
@@ -4840,16 +5281,16 @@ static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("update_elo", 1);
 
-  /* "cython_run_tournament.pyx":18
- *         elo_formula (callable): Function to calculate expected score.
+  /* "cython_run_tournament.pyx":41
+ *         match_outcome (double): Scaled outcome (range [0, 1]) based on match results.
  *     """
  *     cdef double expected_w = elo_formula(winner.rating, loser.rating)             # <<<<<<<<<<<<<<
  *     cdef double expected_l = elo_formula(loser.rating, winner.rating)
  * 
  */
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_winner->rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_winner->rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_loser->rating); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_loser->rating); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_v_elo_formula);
   __pyx_t_4 = __pyx_v_elo_formula; __pyx_t_5 = NULL;
@@ -4872,24 +5313,24 @@ static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_expected_w = __pyx_t_7;
 
-  /* "cython_run_tournament.pyx":19
+  /* "cython_run_tournament.pyx":42
  *     """
  *     cdef double expected_w = elo_formula(winner.rating, loser.rating)
  *     cdef double expected_l = elo_formula(loser.rating, winner.rating)             # <<<<<<<<<<<<<<
  * 
- *     winner.update_rating(winner.rating + k * (1 - expected_w))
+ *     # Update ratings using the scaled match outcome
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_loser->rating); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_loser->rating); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_winner->rating); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_winner->rating); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_v_elo_formula);
   __pyx_t_2 = __pyx_v_elo_formula; __pyx_t_5 = NULL;
@@ -4912,24 +5353,24 @@ static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_expected_l = __pyx_t_7;
 
-  /* "cython_run_tournament.pyx":21
- *     cdef double expected_l = elo_formula(loser.rating, winner.rating)
+  /* "cython_run_tournament.pyx":45
  * 
- *     winner.update_rating(winner.rating + k * (1 - expected_w))             # <<<<<<<<<<<<<<
- *     loser.update_rating(loser.rating + k * (0 - expected_l))
+ *     # Update ratings using the scaled match outcome
+ *     winner.update_rating(winner.rating + k * (match_outcome - expected_w))             # <<<<<<<<<<<<<<
+ *     loser.update_rating(loser.rating + k * ((1 - match_outcome) - expected_l))
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_winner), __pyx_n_s_update_rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_winner), __pyx_n_s_update_rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble((__pyx_v_winner->rating + (__pyx_v_k * (1.0 - __pyx_v_expected_w)))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble((__pyx_v_winner->rating + (__pyx_v_k * (__pyx_v_match_outcome - __pyx_v_expected_w)))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   __pyx_t_6 = 0;
@@ -4950,22 +5391,22 @@ static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cython_run_tournament.pyx":22
+  /* "cython_run_tournament.pyx":46
+ *     # Update ratings using the scaled match outcome
+ *     winner.update_rating(winner.rating + k * (match_outcome - expected_w))
+ *     loser.update_rating(loser.rating + k * ((1 - match_outcome) - expected_l))             # <<<<<<<<<<<<<<
  * 
- *     winner.update_rating(winner.rating + k * (1 - expected_w))
- *     loser.update_rating(loser.rating + k * (0 - expected_l))             # <<<<<<<<<<<<<<
- * 
- *     winner.matches_played += 1
+ *     # Increment matches played
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_loser), __pyx_n_s_update_rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_loser), __pyx_n_s_update_rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble((__pyx_v_loser->rating + (__pyx_v_k * (0.0 - __pyx_v_expected_l)))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble((__pyx_v_loser->rating + (__pyx_v_k * ((1.0 - __pyx_v_match_outcome) - __pyx_v_expected_l)))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   __pyx_t_6 = 0;
@@ -4986,34 +5427,34 @@ static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "cython_run_tournament.pyx":24
- *     loser.update_rating(loser.rating + k * (0 - expected_l))
+  /* "cython_run_tournament.pyx":49
  * 
+ *     # Increment matches played
  *     winner.matches_played += 1             # <<<<<<<<<<<<<<
  *     loser.matches_played += 1
  * 
  */
   __pyx_v_winner->matches_played = (__pyx_v_winner->matches_played + 1);
 
-  /* "cython_run_tournament.pyx":25
- * 
+  /* "cython_run_tournament.pyx":50
+ *     # Increment matches played
  *     winner.matches_played += 1
  *     loser.matches_played += 1             # <<<<<<<<<<<<<<
  * 
- * def run_tournament(list players, double k, int p, dict history, object elo_formula):
+ * 
  */
   __pyx_v_loser->matches_played = (__pyx_v_loser->matches_played + 1);
 
-  /* "cython_run_tournament.pyx":8
+  /* "cython_run_tournament.pyx":30
+ *         raise ValueError("Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.")
  * 
- * 
- * cdef void update_elo(Player winner, Player loser, double k, object elo_formula):             # <<<<<<<<<<<<<<
+ * cdef void update_elo(Player winner, Player loser, double k, object elo_formula, double match_outcome):             # <<<<<<<<<<<<<<
  *     """
  *     Update Elo ratings for the winner and loser based on the Elo formula.
  */
@@ -5031,12 +5472,12 @@ static void __pyx_f_21cython_run_tournament_update_elo(struct __pyx_obj_6player_
   __Pyx_RefNannyFinishContext();
 }
 
-/* "cython_run_tournament.pyx":27
- *     loser.matches_played += 1
+/* "cython_run_tournament.pyx":53
  * 
- * def run_tournament(list players, double k, int p, dict history, object elo_formula):             # <<<<<<<<<<<<<<
- *     """
- *     Simulate a tournament with p players randomly chosen.
+ * 
+ * def run_tournament(             # <<<<<<<<<<<<<<
+ *     list players,
+ *     int p,
  */
 
 /* Python wrapper */
@@ -5047,7 +5488,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_21cython_run_tournament_run_tournament, "\n    Simulate a tournament with p players randomly chosen.\n\n    Args:\n        players (List[Player]): List of players.\n        k (float): K-factor for Elo updates.\n        p (int): Number of participants in the tournament.\n        history (dict): Preprocessed match data.\n        elo_formula (Callable): Function to calculate expected score.\n    ");
+PyDoc_STRVAR(__pyx_doc_21cython_run_tournament_run_tournament, "\n    Simulate a tournament with p players randomly chosen, supporting dynamic and static K.\n\n    Args:\n        players (List[Player]): List of players.\n        k (float): Base K-factor for Elo updates (used for static K).\n        p (int): Number of participants in the tournament.\n        history (dict): Preprocessed match data.\n        elo_formula (Callable): Function to calculate expected score.\n        v (int): Number of games in the \"best-of-v\" format.\n        k_scaling (str): Scaling method for dynamic K (\"sqrt\", \"log\", \"linear\", \"static\", \"custom\").\n        k_min (float): Minimum K-factor (for the first round).\n        k_max (float): Maximum K-factor (for the final round).\n        custom_k (list): Custom list of K values, one for each round (only used if k_scaling=\"custom\").\n    ");
 static PyMethodDef __pyx_mdef_21cython_run_tournament_1run_tournament = {"run_tournament", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_21cython_run_tournament_1run_tournament, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_21cython_run_tournament_run_tournament};
 static PyObject *__pyx_pw_21cython_run_tournament_1run_tournament(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
@@ -5057,15 +5498,20 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
   PyObject *__pyx_v_players = 0;
-  double __pyx_v_k;
   int __pyx_v_p;
   PyObject *__pyx_v_history = 0;
   PyObject *__pyx_v_elo_formula = 0;
+  int __pyx_v_v;
+  PyObject *__pyx_v_k_scaling = 0;
+  double __pyx_v_k;
+  double __pyx_v_k_min;
+  double __pyx_v_k_max;
+  PyObject *__pyx_v_custom_k = 0;
   #if !CYTHON_METH_FASTCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[5] = {0,0,0,0,0};
+  PyObject* values[10] = {0,0,0,0,0,0,0,0,0,0};
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -5081,10 +5527,30 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   #endif
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
   {
-    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_players,&__pyx_n_s_k,&__pyx_n_s_p,&__pyx_n_s_history,&__pyx_n_s_elo_formula,0};
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_players,&__pyx_n_s_p,&__pyx_n_s_history,&__pyx_n_s_elo_formula,&__pyx_n_s_v,&__pyx_n_s_k_scaling,&__pyx_n_s_k,&__pyx_n_s_k_min,&__pyx_n_s_k_max,&__pyx_n_s_custom_k,0};
+    values[5] = __Pyx_Arg_NewRef_FASTCALL(((PyObject*)((PyObject*)__pyx_n_u_sqrt)));
+
+    /* "cython_run_tournament.pyx":63
+ *     double k_min=100,
+ *     double k_max=400,
+ *     list custom_k=None             # <<<<<<<<<<<<<<
+ * ):
+ *     """
+ */
+    values[9] = __Pyx_Arg_NewRef_FASTCALL(((PyObject*)Py_None));
     if (__pyx_kwds) {
       Py_ssize_t kw_args;
       switch (__pyx_nargs) {
+        case 10: values[9] = __Pyx_Arg_FASTCALL(__pyx_args, 9);
+        CYTHON_FALLTHROUGH;
+        case  9: values[8] = __Pyx_Arg_FASTCALL(__pyx_args, 8);
+        CYTHON_FALLTHROUGH;
+        case  8: values[7] = __Pyx_Arg_FASTCALL(__pyx_args, 7);
+        CYTHON_FALLTHROUGH;
+        case  7: values[6] = __Pyx_Arg_FASTCALL(__pyx_args, 6);
+        CYTHON_FALLTHROUGH;
+        case  6: values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
         case  5: values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
         CYTHON_FALLTHROUGH;
         case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
@@ -5105,71 +5571,135 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
-        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_k)) != 0)) {
+        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_p)) != 0)) {
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("run_tournament", 1, 5, 5, 1); __PYX_ERR(0, 27, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("run_tournament", 0, 5, 10, 1); __PYX_ERR(0, 53, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
-        if (likely((values[2] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_p)) != 0)) {
+        if (likely((values[2] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_history)) != 0)) {
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("run_tournament", 1, 5, 5, 2); __PYX_ERR(0, 27, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("run_tournament", 0, 5, 10, 2); __PYX_ERR(0, 53, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
-        if (likely((values[3] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_history)) != 0)) {
+        if (likely((values[3] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_elo_formula)) != 0)) {
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("run_tournament", 1, 5, 5, 3); __PYX_ERR(0, 27, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("run_tournament", 0, 5, 10, 3); __PYX_ERR(0, 53, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
-        if (likely((values[4] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_elo_formula)) != 0)) {
+        if (likely((values[4] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_v)) != 0)) {
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("run_tournament", 1, 5, 5, 4); __PYX_ERR(0, 27, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("run_tournament", 0, 5, 10, 4); __PYX_ERR(0, 53, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_k_scaling);
+          if (value) { values[5] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  6:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_k);
+          if (value) { values[6] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  7:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_k_min);
+          if (value) { values[7] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  8:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_k_max);
+          if (value) { values[8] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  9:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_custom_k);
+          if (value) { values[9] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "run_tournament") < 0)) __PYX_ERR(0, 27, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "run_tournament") < 0)) __PYX_ERR(0, 53, __pyx_L3_error)
       }
-    } else if (unlikely(__pyx_nargs != 5)) {
-      goto __pyx_L5_argtuple_error;
     } else {
-      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
-      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
-      values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
-      values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
-      values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+      switch (__pyx_nargs) {
+        case 10: values[9] = __Pyx_Arg_FASTCALL(__pyx_args, 9);
+        CYTHON_FALLTHROUGH;
+        case  9: values[8] = __Pyx_Arg_FASTCALL(__pyx_args, 8);
+        CYTHON_FALLTHROUGH;
+        case  8: values[7] = __Pyx_Arg_FASTCALL(__pyx_args, 7);
+        CYTHON_FALLTHROUGH;
+        case  7: values[6] = __Pyx_Arg_FASTCALL(__pyx_args, 6);
+        CYTHON_FALLTHROUGH;
+        case  6: values[5] = __Pyx_Arg_FASTCALL(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = __Pyx_Arg_FASTCALL(__pyx_args, 4);
+        values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
+        values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
+        values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
     }
     __pyx_v_players = ((PyObject*)values[0]);
-    __pyx_v_k = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_k == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
-    __pyx_v_p = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_p == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
-    __pyx_v_history = ((PyObject*)values[3]);
-    __pyx_v_elo_formula = values[4];
+    __pyx_v_p = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_p == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 55, __pyx_L3_error)
+    __pyx_v_history = ((PyObject*)values[2]);
+    __pyx_v_elo_formula = values[3];
+    __pyx_v_v = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_v == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L3_error)
+    __pyx_v_k_scaling = ((PyObject*)values[5]);
+    if (values[6]) {
+      __pyx_v_k = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_k == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 60, __pyx_L3_error)
+    } else {
+      __pyx_v_k = ((double)((double)32.0));
+    }
+    if (values[7]) {
+      __pyx_v_k_min = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_k_min == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L3_error)
+    } else {
+      __pyx_v_k_min = ((double)((double)100.0));
+    }
+    if (values[8]) {
+      __pyx_v_k_max = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_k_max == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L3_error)
+    } else {
+      __pyx_v_k_max = ((double)((double)400.0));
+    }
+    __pyx_v_custom_k = ((PyObject*)values[9]);
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("run_tournament", 1, 5, 5, __pyx_nargs); __PYX_ERR(0, 27, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("run_tournament", 0, 5, 10, __pyx_nargs); __PYX_ERR(0, 53, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -5183,9 +5713,19 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_players), (&PyList_Type), 1, "players", 1))) __PYX_ERR(0, 27, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_history), (&PyDict_Type), 1, "history", 1))) __PYX_ERR(0, 27, __pyx_L1_error)
-  __pyx_r = __pyx_pf_21cython_run_tournament_run_tournament(__pyx_self, __pyx_v_players, __pyx_v_k, __pyx_v_p, __pyx_v_history, __pyx_v_elo_formula);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_players), (&PyList_Type), 1, "players", 1))) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_history), (&PyDict_Type), 1, "history", 1))) __PYX_ERR(0, 56, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_k_scaling), (&PyUnicode_Type), 1, "k_scaling", 1))) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_custom_k), (&PyList_Type), 1, "custom_k", 1))) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_r = __pyx_pf_21cython_run_tournament_run_tournament(__pyx_self, __pyx_v_players, __pyx_v_p, __pyx_v_history, __pyx_v_elo_formula, __pyx_v_v, __pyx_v_k_scaling, __pyx_v_k, __pyx_v_k_min, __pyx_v_k_max, __pyx_v_custom_k);
+
+  /* "cython_run_tournament.pyx":53
+ * 
+ * 
+ * def run_tournament(             # <<<<<<<<<<<<<<
+ *     list players,
+ *     int p,
+ */
 
   /* function exit code */
   goto __pyx_L0;
@@ -5202,451 +5742,735 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_players, double __pyx_v_k, int __pyx_v_p, PyObject *__pyx_v_history, PyObject *__pyx_v_elo_formula) {
+static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_players, int __pyx_v_p, PyObject *__pyx_v_history, PyObject *__pyx_v_elo_formula, int __pyx_v_v, PyObject *__pyx_v_k_scaling, double __pyx_v_k, double __pyx_v_k_min, double __pyx_v_k_max, PyObject *__pyx_v_custom_k) {
   int __pyx_v_len_participants;
   struct __pyx_obj_6player_Player *__pyx_v_player_1 = 0;
   struct __pyx_obj_6player_Player *__pyx_v_player_2 = 0;
   PyObject *__pyx_v_next_participants = 0;
+  int __pyx_v_round_number;
+  int __pyx_v_total_rounds;
+  double __pyx_v_current_k;
   PyObject *__pyx_v_rng = NULL;
   PyObject *__pyx_v_participants = NULL;
   PyObject *__pyx_v_i = NULL;
+  PyObject *__pyx_v_winner_score = NULL;
+  PyObject *__pyx_v_loser_score = NULL;
   PyObject *__pyx_v_is_1_winner = NULL;
+  PyObject *__pyx_v_match_outcome = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  unsigned int __pyx_t_4;
+  PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
-  Py_ssize_t __pyx_t_7;
+  unsigned int __pyx_t_7;
   int __pyx_t_8;
-  PyObject *(*__pyx_t_9)(PyObject *);
+  Py_ssize_t __pyx_t_9;
   int __pyx_t_10;
+  long __pyx_t_11;
+  double __pyx_t_12;
+  PyObject *(*__pyx_t_13)(PyObject *);
+  int __pyx_t_14;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("run_tournament", 1);
 
-  /* "cython_run_tournament.pyx":41
+  /* "cython_run_tournament.pyx":83
  *     cdef Player player_1, player_2
  *     cdef list next_participants
- *     rng = np.random.default_rng()             # <<<<<<<<<<<<<<
- * 
- *     # Randomly select participants
+ *     cdef int round_number = 1             # <<<<<<<<<<<<<<
+ *     cdef int total_rounds = int(np.ceil(np.log2(p)))  # Total rounds in the tournament
+ *     cdef double current_k  # Declare here at the top of the function
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_random); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_default_rng); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = NULL;
-  __pyx_t_4 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (likely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_3)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_3);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-      __pyx_t_4 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_3, NULL};
-    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
-    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  }
-  __pyx_v_rng = __pyx_t_1;
-  __pyx_t_1 = 0;
+  __pyx_v_round_number = 1;
 
-  /* "cython_run_tournament.pyx":44
- * 
- *     # Randomly select participants
- *     participants = rng.choice(players, size=p, replace=False).tolist()             # <<<<<<<<<<<<<<
- *     len_participants = len(participants)
- * 
+  /* "cython_run_tournament.pyx":84
+ *     cdef list next_participants
+ *     cdef int round_number = 1
+ *     cdef int total_rounds = int(np.ceil(np.log2(p)))  # Total rounds in the tournament             # <<<<<<<<<<<<<<
+ *     cdef double current_k  # Declare here at the top of the function
+ *     rng = np.random.default_rng()
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_choice); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_ceil); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_INCREF(__pyx_v_players);
-  __Pyx_GIVEREF(__pyx_v_players);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_players)) __PYX_ERR(0, 44, __pyx_L1_error);
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_p); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 44, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_size, __pyx_t_6) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_replace, Py_False) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 44, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_tolist); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_log2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_p); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_6 = NULL;
-  __pyx_t_4 = 0;
+  __pyx_t_7 = 0;
   #if CYTHON_UNPACK_METHODS
-  if (likely(PyMethod_Check(__pyx_t_5))) {
+  if (unlikely(PyMethod_Check(__pyx_t_5))) {
     __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_5);
     if (likely(__pyx_t_6)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
       __Pyx_INCREF(__pyx_t_6);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_5, function);
-      __pyx_t_4 = 1;
+      __pyx_t_7 = 1;
     }
   }
   #endif
   {
-    PyObject *__pyx_callargs[2] = {__pyx_t_6, NULL};
-    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
+    PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_t_4};
+    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  __pyx_v_participants = __pyx_t_1;
-  __pyx_t_1 = 0;
+  __pyx_t_5 = NULL;
+  __pyx_t_7 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __pyx_t_7 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_t_2};
+    __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  }
+  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_total_rounds = __pyx_t_8;
 
-  /* "cython_run_tournament.pyx":45
+  /* "cython_run_tournament.pyx":86
+ *     cdef int total_rounds = int(np.ceil(np.log2(p)))  # Total rounds in the tournament
+ *     cdef double current_k  # Declare here at the top of the function
+ *     rng = np.random.default_rng()             # <<<<<<<<<<<<<<
+ * 
+ *     # Randomly select participants
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_random); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_default_rng); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  __pyx_t_7 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (likely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+      __pyx_t_7 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
+    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
+    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+  __pyx_v_rng = __pyx_t_3;
+  __pyx_t_3 = 0;
+
+  /* "cython_run_tournament.pyx":89
+ * 
+ *     # Randomly select participants
+ *     participants = rng.choice(players, size=p, replace=False).tolist()             # <<<<<<<<<<<<<<
+ *     len_participants = len(participants)
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_choice); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_INCREF(__pyx_v_players);
+  __Pyx_GIVEREF(__pyx_v_players);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_players)) __PYX_ERR(0, 89, __pyx_L1_error);
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_p); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_size, __pyx_t_4) < 0) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_replace, Py_False) < 0) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_tolist); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 89, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = NULL;
+  __pyx_t_7 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (likely(PyMethod_Check(__pyx_t_5))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_5, function);
+      __pyx_t_7 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_4, NULL};
+    __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+  __pyx_v_participants = __pyx_t_3;
+  __pyx_t_3 = 0;
+
+  /* "cython_run_tournament.pyx":90
  *     # Randomly select participants
  *     participants = rng.choice(players, size=p, replace=False).tolist()
  *     len_participants = len(participants)             # <<<<<<<<<<<<<<
  * 
  *     while len_participants > 1:
  */
-  __pyx_t_7 = PyObject_Length(__pyx_v_participants); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 45, __pyx_L1_error)
-  __pyx_v_len_participants = __pyx_t_7;
+  __pyx_t_9 = PyObject_Length(__pyx_v_participants); if (unlikely(__pyx_t_9 == ((Py_ssize_t)-1))) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_v_len_participants = __pyx_t_9;
 
-  /* "cython_run_tournament.pyx":47
+  /* "cython_run_tournament.pyx":92
  *     len_participants = len(participants)
  * 
  *     while len_participants > 1:             # <<<<<<<<<<<<<<
  *         next_participants = []
- *         for i in range(0, len_participants, 2):
+ * 
  */
   while (1) {
-    __pyx_t_8 = (__pyx_v_len_participants > 1);
-    if (!__pyx_t_8) break;
+    __pyx_t_10 = (__pyx_v_len_participants > 1);
+    if (!__pyx_t_10) break;
 
-    /* "cython_run_tournament.pyx":48
+    /* "cython_run_tournament.pyx":93
  * 
  *     while len_participants > 1:
  *         next_participants = []             # <<<<<<<<<<<<<<
- *         for i in range(0, len_participants, 2):
- *             player_1 = participants[i]
+ * 
+ *         # Determine K for the current round
  */
-    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_XDECREF_SET(__pyx_v_next_participants, ((PyObject*)__pyx_t_1));
-    __pyx_t_1 = 0;
+    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 93, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_XDECREF_SET(__pyx_v_next_participants, ((PyObject*)__pyx_t_3));
+    __pyx_t_3 = 0;
 
-    /* "cython_run_tournament.pyx":49
- *     while len_participants > 1:
- *         next_participants = []
+    /* "cython_run_tournament.pyx":96
+ * 
+ *         # Determine K for the current round
+ *         if k_scaling == "static":             # <<<<<<<<<<<<<<
+ *             current_k = k
+ *         elif k_scaling == "custom":
+ */
+    __pyx_t_10 = (__Pyx_PyUnicode_Equals(__pyx_v_k_scaling, __pyx_n_u_static, Py_EQ)); if (unlikely((__pyx_t_10 < 0))) __PYX_ERR(0, 96, __pyx_L1_error)
+    if (__pyx_t_10) {
+
+      /* "cython_run_tournament.pyx":97
+ *         # Determine K for the current round
+ *         if k_scaling == "static":
+ *             current_k = k             # <<<<<<<<<<<<<<
+ *         elif k_scaling == "custom":
+ *             if round_number <= len(custom_k):
+ */
+      __pyx_v_current_k = __pyx_v_k;
+
+      /* "cython_run_tournament.pyx":96
+ * 
+ *         # Determine K for the current round
+ *         if k_scaling == "static":             # <<<<<<<<<<<<<<
+ *             current_k = k
+ *         elif k_scaling == "custom":
+ */
+      goto __pyx_L5;
+    }
+
+    /* "cython_run_tournament.pyx":98
+ *         if k_scaling == "static":
+ *             current_k = k
+ *         elif k_scaling == "custom":             # <<<<<<<<<<<<<<
+ *             if round_number <= len(custom_k):
+ *                 current_k = custom_k[round_number - 1]
+ */
+    __pyx_t_10 = (__Pyx_PyUnicode_Equals(__pyx_v_k_scaling, __pyx_n_u_custom, Py_EQ)); if (unlikely((__pyx_t_10 < 0))) __PYX_ERR(0, 98, __pyx_L1_error)
+    if (__pyx_t_10) {
+
+      /* "cython_run_tournament.pyx":99
+ *             current_k = k
+ *         elif k_scaling == "custom":
+ *             if round_number <= len(custom_k):             # <<<<<<<<<<<<<<
+ *                 current_k = custom_k[round_number - 1]
+ *             else:
+ */
+      if (unlikely(__pyx_v_custom_k == Py_None)) {
+        PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
+        __PYX_ERR(0, 99, __pyx_L1_error)
+      }
+      __pyx_t_9 = __Pyx_PyList_GET_SIZE(__pyx_v_custom_k); if (unlikely(__pyx_t_9 == ((Py_ssize_t)-1))) __PYX_ERR(0, 99, __pyx_L1_error)
+      __pyx_t_10 = (__pyx_v_round_number <= __pyx_t_9);
+      if (likely(__pyx_t_10)) {
+
+        /* "cython_run_tournament.pyx":100
+ *         elif k_scaling == "custom":
+ *             if round_number <= len(custom_k):
+ *                 current_k = custom_k[round_number - 1]             # <<<<<<<<<<<<<<
+ *             else:
+ *                 raise ValueError("Custom K array is smaller than the total number of rounds.")
+ */
+        if (unlikely(__pyx_v_custom_k == Py_None)) {
+          PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+          __PYX_ERR(0, 100, __pyx_L1_error)
+        }
+        __pyx_t_11 = (__pyx_v_round_number - 1);
+        __pyx_t_3 = __Pyx_GetItemInt_List(__pyx_v_custom_k, __pyx_t_11, long, 1, __Pyx_PyInt_From_long, 1, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_12 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_12 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __pyx_v_current_k = __pyx_t_12;
+
+        /* "cython_run_tournament.pyx":99
+ *             current_k = k
+ *         elif k_scaling == "custom":
+ *             if round_number <= len(custom_k):             # <<<<<<<<<<<<<<
+ *                 current_k = custom_k[round_number - 1]
+ *             else:
+ */
+        goto __pyx_L6;
+      }
+
+      /* "cython_run_tournament.pyx":102
+ *                 current_k = custom_k[round_number - 1]
+ *             else:
+ *                 raise ValueError("Custom K array is smaller than the total number of rounds.")             # <<<<<<<<<<<<<<
+ *         else:
+ *             current_k = dynamic_k(round_number, total_rounds, k_min, k_max, k_scaling)
+ */
+      /*else*/ {
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 102, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __PYX_ERR(0, 102, __pyx_L1_error)
+      }
+      __pyx_L6:;
+
+      /* "cython_run_tournament.pyx":98
+ *         if k_scaling == "static":
+ *             current_k = k
+ *         elif k_scaling == "custom":             # <<<<<<<<<<<<<<
+ *             if round_number <= len(custom_k):
+ *                 current_k = custom_k[round_number - 1]
+ */
+      goto __pyx_L5;
+    }
+
+    /* "cython_run_tournament.pyx":104
+ *                 raise ValueError("Custom K array is smaller than the total number of rounds.")
+ *         else:
+ *             current_k = dynamic_k(round_number, total_rounds, k_min, k_max, k_scaling)             # <<<<<<<<<<<<<<
+ * 
+ *         # Simulate matches for the current round
+ */
+    /*else*/ {
+      __pyx_t_12 = __pyx_f_21cython_run_tournament_dynamic_k(__pyx_v_round_number, __pyx_v_total_rounds, __pyx_v_k_min, __pyx_v_k_max, __pyx_v_k_scaling); if (unlikely(__pyx_t_12 == ((double)-1) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
+      __pyx_v_current_k = __pyx_t_12;
+    }
+    __pyx_L5:;
+
+    /* "cython_run_tournament.pyx":107
+ * 
+ *         # Simulate matches for the current round
  *         for i in range(0, len_participants, 2):             # <<<<<<<<<<<<<<
  *             player_1 = participants[i]
  *             player_2 = participants[i + 1]
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_len_participants); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_len_participants); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_int_0);
     __Pyx_GIVEREF(__pyx_int_0);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_int_0)) __PYX_ERR(0, 49, __pyx_L1_error);
-    __Pyx_GIVEREF(__pyx_t_1);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_int_0)) __PYX_ERR(0, 107, __pyx_L1_error);
+    __Pyx_GIVEREF(__pyx_t_3);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error);
     __Pyx_INCREF(__pyx_int_2);
     __Pyx_GIVEREF(__pyx_int_2);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_int_2)) __PYX_ERR(0, 49, __pyx_L1_error);
-    __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_int_2)) __PYX_ERR(0, 107, __pyx_L1_error);
+    __pyx_t_3 = 0;
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
-      __pyx_t_5 = __pyx_t_1; __Pyx_INCREF(__pyx_t_5);
-      __pyx_t_7 = 0;
-      __pyx_t_9 = NULL;
+    if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
+      __pyx_t_5 = __pyx_t_3; __Pyx_INCREF(__pyx_t_5);
+      __pyx_t_9 = 0;
+      __pyx_t_13 = NULL;
     } else {
-      __pyx_t_7 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+      __pyx_t_9 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_9 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 49, __pyx_L1_error)
+      __pyx_t_13 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_5); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 107, __pyx_L1_error)
     }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     for (;;) {
-      if (likely(!__pyx_t_9)) {
+      if (likely(!__pyx_t_13)) {
         if (likely(PyList_CheckExact(__pyx_t_5))) {
           {
             Py_ssize_t __pyx_temp = __Pyx_PyList_GET_SIZE(__pyx_t_5);
             #if !CYTHON_ASSUME_SAFE_MACROS
-            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 49, __pyx_L1_error)
+            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 107, __pyx_L1_error)
             #endif
-            if (__pyx_t_7 >= __pyx_temp) break;
+            if (__pyx_t_9 >= __pyx_temp) break;
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_1); __pyx_t_7++; if (unlikely((0 < 0))) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_9); __Pyx_INCREF(__pyx_t_3); __pyx_t_9++; if (unlikely((0 < 0))) __PYX_ERR(0, 107, __pyx_L1_error)
           #else
-          __pyx_t_1 = __Pyx_PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_5, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_3);
           #endif
         } else {
           {
             Py_ssize_t __pyx_temp = __Pyx_PyTuple_GET_SIZE(__pyx_t_5);
             #if !CYTHON_ASSUME_SAFE_MACROS
-            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 49, __pyx_L1_error)
+            if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 107, __pyx_L1_error)
             #endif
-            if (__pyx_t_7 >= __pyx_temp) break;
+            if (__pyx_t_9 >= __pyx_temp) break;
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_7); __Pyx_INCREF(__pyx_t_1); __pyx_t_7++; if (unlikely((0 < 0))) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_9); __Pyx_INCREF(__pyx_t_3); __pyx_t_9++; if (unlikely((0 < 0))) __PYX_ERR(0, 107, __pyx_L1_error)
           #else
-          __pyx_t_1 = __Pyx_PySequence_ITEM(__pyx_t_5, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_5, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_3);
           #endif
         }
       } else {
-        __pyx_t_1 = __pyx_t_9(__pyx_t_5);
-        if (unlikely(!__pyx_t_1)) {
+        __pyx_t_3 = __pyx_t_13(__pyx_t_5);
+        if (unlikely(!__pyx_t_3)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 49, __pyx_L1_error)
+            else __PYX_ERR(0, 107, __pyx_L1_error)
           }
           break;
         }
-        __Pyx_GOTREF(__pyx_t_1);
+        __Pyx_GOTREF(__pyx_t_3);
       }
-      __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_1);
-      __pyx_t_1 = 0;
+      __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
+      __pyx_t_3 = 0;
 
-      /* "cython_run_tournament.pyx":50
- *         next_participants = []
+      /* "cython_run_tournament.pyx":108
+ *         # Simulate matches for the current round
  *         for i in range(0, len_participants, 2):
  *             player_1 = participants[i]             # <<<<<<<<<<<<<<
  *             player_2 = participants[i + 1]
  * 
  */
-      __pyx_t_1 = __Pyx_PyObject_GetItem(__pyx_v_participants, __pyx_v_i); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_6player_Player))))) __PYX_ERR(0, 50, __pyx_L1_error)
-      __Pyx_XDECREF_SET(__pyx_v_player_1, ((struct __pyx_obj_6player_Player *)__pyx_t_1));
-      __pyx_t_1 = 0;
+      __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_v_participants, __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_6player_Player))))) __PYX_ERR(0, 108, __pyx_L1_error)
+      __Pyx_XDECREF_SET(__pyx_v_player_1, ((struct __pyx_obj_6player_Player *)__pyx_t_3));
+      __pyx_t_3 = 0;
 
-      /* "cython_run_tournament.pyx":51
+      /* "cython_run_tournament.pyx":109
  *         for i in range(0, len_participants, 2):
  *             player_1 = participants[i]
  *             player_2 = participants[i + 1]             # <<<<<<<<<<<<<<
  * 
  *             # Lookup historical outcome
  */
-      __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_6 = __Pyx_PyObject_GetItem(__pyx_v_participants, __pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 51, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      if (!(likely(((__pyx_t_6) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_6, __pyx_ptype_6player_Player))))) __PYX_ERR(0, 51, __pyx_L1_error)
-      __Pyx_XDECREF_SET(__pyx_v_player_2, ((struct __pyx_obj_6player_Player *)__pyx_t_6));
-      __pyx_t_6 = 0;
+      __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_participants, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_6player_Player))))) __PYX_ERR(0, 109, __pyx_L1_error)
+      __Pyx_XDECREF_SET(__pyx_v_player_2, ((struct __pyx_obj_6player_Player *)__pyx_t_4));
+      __pyx_t_4 = 0;
 
-      /* "cython_run_tournament.pyx":54
+      /* "cython_run_tournament.pyx":112
  * 
  *             # Lookup historical outcome
  *             if (player_1.id, player_2.id) in history:             # <<<<<<<<<<<<<<
- *                 is_1_winner = history[(player_1.id, player_2.id)]['Winner_Score'] > history[(player_1.id, player_2.id)]['Loser_Score']
- *             else:
+ *                 # Retrieve scores
+ *                 winner_score = history[(player_1.id, player_2.id)]['Winner_Score']
  */
-      __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 54, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
+      __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 112, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
       __Pyx_INCREF(__pyx_v_player_1->id);
       __Pyx_GIVEREF(__pyx_v_player_1->id);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_player_1->id)) __PYX_ERR(0, 54, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_player_1->id)) __PYX_ERR(0, 112, __pyx_L1_error);
       __Pyx_INCREF(__pyx_v_player_2->id);
       __Pyx_GIVEREF(__pyx_v_player_2->id);
-      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_v_player_2->id)) __PYX_ERR(0, 54, __pyx_L1_error);
+      if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_player_2->id)) __PYX_ERR(0, 112, __pyx_L1_error);
       if (unlikely(__pyx_v_history == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-        __PYX_ERR(0, 54, __pyx_L1_error)
+        __PYX_ERR(0, 112, __pyx_L1_error)
       }
-      __pyx_t_8 = (__Pyx_PyDict_ContainsTF(__pyx_t_6, __pyx_v_history, Py_EQ)); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 54, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (__pyx_t_8) {
+      __pyx_t_10 = (__Pyx_PyDict_ContainsTF(__pyx_t_4, __pyx_v_history, Py_EQ)); if (unlikely((__pyx_t_10 < 0))) __PYX_ERR(0, 112, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      if (__pyx_t_10) {
 
-        /* "cython_run_tournament.pyx":55
- *             # Lookup historical outcome
+        /* "cython_run_tournament.pyx":114
  *             if (player_1.id, player_2.id) in history:
- *                 is_1_winner = history[(player_1.id, player_2.id)]['Winner_Score'] > history[(player_1.id, player_2.id)]['Loser_Score']             # <<<<<<<<<<<<<<
- *             else:
- *                 is_1_winner = rng.integers(2) == 0  # Random outcome if no history exists
+ *                 # Retrieve scores
+ *                 winner_score = history[(player_1.id, player_2.id)]['Winner_Score']             # <<<<<<<<<<<<<<
+ *                 loser_score = history[(player_1.id, player_2.id)]['Loser_Score']
+ * 
  */
         if (unlikely(__pyx_v_history == Py_None)) {
           PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-          __PYX_ERR(0, 55, __pyx_L1_error)
+          __PYX_ERR(0, 114, __pyx_L1_error)
         }
-        __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 55, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_6);
+        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_v_player_1->id);
         __Pyx_GIVEREF(__pyx_v_player_1->id);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_player_1->id)) __PYX_ERR(0, 55, __pyx_L1_error);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_player_1->id)) __PYX_ERR(0, 114, __pyx_L1_error);
         __Pyx_INCREF(__pyx_v_player_2->id);
         __Pyx_GIVEREF(__pyx_v_player_2->id);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_v_player_2->id)) __PYX_ERR(0, 55, __pyx_L1_error);
-        __pyx_t_1 = __Pyx_PyDict_GetItem(__pyx_v_history, __pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-        __pyx_t_6 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_Winner_Score); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 55, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_6);
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_player_2->id)) __PYX_ERR(0, 114, __pyx_L1_error);
+        __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_history, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_u_Winner_Score); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_XDECREF_SET(__pyx_v_winner_score, __pyx_t_4);
+        __pyx_t_4 = 0;
+
+        /* "cython_run_tournament.pyx":115
+ *                 # Retrieve scores
+ *                 winner_score = history[(player_1.id, player_2.id)]['Winner_Score']
+ *                 loser_score = history[(player_1.id, player_2.id)]['Loser_Score']             # <<<<<<<<<<<<<<
+ * 
+ *                 # Determine winner and match outcome
+ */
         if (unlikely(__pyx_v_history == Py_None)) {
           PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-          __PYX_ERR(0, 55, __pyx_L1_error)
+          __PYX_ERR(0, 115, __pyx_L1_error)
         }
-        __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
+        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 115, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_v_player_1->id);
         __Pyx_GIVEREF(__pyx_v_player_1->id);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_player_1->id)) __PYX_ERR(0, 55, __pyx_L1_error);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_player_1->id)) __PYX_ERR(0, 115, __pyx_L1_error);
         __Pyx_INCREF(__pyx_v_player_2->id);
         __Pyx_GIVEREF(__pyx_v_player_2->id);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_player_2->id)) __PYX_ERR(0, 55, __pyx_L1_error);
-        __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_history, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_player_2->id)) __PYX_ERR(0, 115, __pyx_L1_error);
+        __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_history, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_u_Loser_Score); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_u_Loser_Score); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 115, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyObject_RichCompare(__pyx_t_6, __pyx_t_1, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __Pyx_XDECREF_SET(__pyx_v_is_1_winner, __pyx_t_3);
+        __Pyx_XDECREF_SET(__pyx_v_loser_score, __pyx_t_4);
+        __pyx_t_4 = 0;
+
+        /* "cython_run_tournament.pyx":118
+ * 
+ *                 # Determine winner and match outcome
+ *                 is_1_winner = winner_score > loser_score             # <<<<<<<<<<<<<<
+ *                 match_outcome = winner_score / v  # Scaled outcome
+ *             else:
+ */
+        __pyx_t_4 = PyObject_RichCompare(__pyx_v_winner_score, __pyx_v_loser_score, Py_GT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 118, __pyx_L1_error)
+        __Pyx_XDECREF_SET(__pyx_v_is_1_winner, __pyx_t_4);
+        __pyx_t_4 = 0;
+
+        /* "cython_run_tournament.pyx":119
+ *                 # Determine winner and match outcome
+ *                 is_1_winner = winner_score > loser_score
+ *                 match_outcome = winner_score / v  # Scaled outcome             # <<<<<<<<<<<<<<
+ *             else:
+ *                 # Random outcome if no history exists
+ */
+        __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_v); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 119, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_v_winner_score, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __Pyx_XDECREF_SET(__pyx_v_match_outcome, __pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "cython_run_tournament.pyx":54
+        /* "cython_run_tournament.pyx":112
  * 
  *             # Lookup historical outcome
  *             if (player_1.id, player_2.id) in history:             # <<<<<<<<<<<<<<
- *                 is_1_winner = history[(player_1.id, player_2.id)]['Winner_Score'] > history[(player_1.id, player_2.id)]['Loser_Score']
- *             else:
+ *                 # Retrieve scores
+ *                 winner_score = history[(player_1.id, player_2.id)]['Winner_Score']
  */
-        goto __pyx_L7;
+        goto __pyx_L9;
       }
 
-      /* "cython_run_tournament.pyx":57
- *                 is_1_winner = history[(player_1.id, player_2.id)]['Winner_Score'] > history[(player_1.id, player_2.id)]['Loser_Score']
+      /* "cython_run_tournament.pyx":122
  *             else:
- *                 is_1_winner = rng.integers(2) == 0  # Random outcome if no history exists             # <<<<<<<<<<<<<<
+ *                 # Random outcome if no history exists
+ *                 is_1_winner = rng.integers(2) == 0             # <<<<<<<<<<<<<<
+ *                 match_outcome = rng.random()  # Simulate a random outcome scale
  * 
- *             if is_1_winner:
  */
       /*else*/ {
-        __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_integers); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __pyx_t_6 = NULL;
-        __pyx_t_4 = 0;
+        __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_integers); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 122, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_2 = NULL;
+        __pyx_t_7 = 0;
         #if CYTHON_UNPACK_METHODS
-        if (likely(PyMethod_Check(__pyx_t_1))) {
-          __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_1);
-          if (likely(__pyx_t_6)) {
-            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-            __Pyx_INCREF(__pyx_t_6);
+        if (likely(PyMethod_Check(__pyx_t_4))) {
+          __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_4);
+          if (likely(__pyx_t_2)) {
+            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+            __Pyx_INCREF(__pyx_t_2);
             __Pyx_INCREF(function);
-            __Pyx_DECREF_SET(__pyx_t_1, function);
-            __pyx_t_4 = 1;
+            __Pyx_DECREF_SET(__pyx_t_4, function);
+            __pyx_t_7 = 1;
           }
         }
         #endif
         {
-          PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_int_2};
-          __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_4, 1+__pyx_t_4);
-          __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-          if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 57, __pyx_L1_error)
+          PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_int_2};
+          __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
+          __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+          if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 122, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         }
-        __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_t_3, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
+        __pyx_t_4 = __Pyx_PyInt_EqObjC(__pyx_t_3, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 122, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __Pyx_XDECREF_SET(__pyx_v_is_1_winner, __pyx_t_1);
-        __pyx_t_1 = 0;
-      }
-      __pyx_L7:;
+        __Pyx_XDECREF_SET(__pyx_v_is_1_winner, __pyx_t_4);
+        __pyx_t_4 = 0;
 
-      /* "cython_run_tournament.pyx":59
- *                 is_1_winner = rng.integers(2) == 0  # Random outcome if no history exists
+        /* "cython_run_tournament.pyx":123
+ *                 # Random outcome if no history exists
+ *                 is_1_winner = rng.integers(2) == 0
+ *                 match_outcome = rng.random()  # Simulate a random outcome scale             # <<<<<<<<<<<<<<
  * 
+ *             # Update Elo ratings based on winner
+ */
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_random); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_2 = NULL;
+        __pyx_t_7 = 0;
+        #if CYTHON_UNPACK_METHODS
+        if (likely(PyMethod_Check(__pyx_t_3))) {
+          __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+          if (likely(__pyx_t_2)) {
+            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+            __Pyx_INCREF(__pyx_t_2);
+            __Pyx_INCREF(function);
+            __Pyx_DECREF_SET(__pyx_t_3, function);
+            __pyx_t_7 = 1;
+          }
+        }
+        #endif
+        {
+          PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
+          __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
+          __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+          if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_4);
+          __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        }
+        __Pyx_XDECREF_SET(__pyx_v_match_outcome, __pyx_t_4);
+        __pyx_t_4 = 0;
+      }
+      __pyx_L9:;
+
+      /* "cython_run_tournament.pyx":126
+ * 
+ *             # Update Elo ratings based on winner
  *             if is_1_winner:             # <<<<<<<<<<<<<<
- *                 update_elo(player_1, player_2, k, elo_formula)
+ *                 update_elo(player_1, player_2, current_k, elo_formula, match_outcome)
  *                 next_participants.append(player_1)
  */
-      __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_is_1_winner); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(0, 59, __pyx_L1_error)
-      if (__pyx_t_8) {
+      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_is_1_winner); if (unlikely((__pyx_t_10 < 0))) __PYX_ERR(0, 126, __pyx_L1_error)
+      if (__pyx_t_10) {
 
-        /* "cython_run_tournament.pyx":60
- * 
+        /* "cython_run_tournament.pyx":127
+ *             # Update Elo ratings based on winner
  *             if is_1_winner:
- *                 update_elo(player_1, player_2, k, elo_formula)             # <<<<<<<<<<<<<<
+ *                 update_elo(player_1, player_2, current_k, elo_formula, match_outcome)             # <<<<<<<<<<<<<<
  *                 next_participants.append(player_1)
  *             else:
  */
-        __pyx_f_21cython_run_tournament_update_elo(__pyx_v_player_1, __pyx_v_player_2, __pyx_v_k, __pyx_v_elo_formula); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 60, __pyx_L1_error)
+        __pyx_t_12 = __pyx_PyFloat_AsDouble(__pyx_v_match_outcome); if (unlikely((__pyx_t_12 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+        __pyx_f_21cython_run_tournament_update_elo(__pyx_v_player_1, __pyx_v_player_2, __pyx_v_current_k, __pyx_v_elo_formula, __pyx_t_12); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
 
-        /* "cython_run_tournament.pyx":61
+        /* "cython_run_tournament.pyx":128
  *             if is_1_winner:
- *                 update_elo(player_1, player_2, k, elo_formula)
+ *                 update_elo(player_1, player_2, current_k, elo_formula, match_outcome)
  *                 next_participants.append(player_1)             # <<<<<<<<<<<<<<
  *             else:
- *                 update_elo(player_2, player_1, k, elo_formula)
+ *                 update_elo(player_2, player_1, current_k, elo_formula, 1 - match_outcome)
  */
-        __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_next_participants, ((PyObject *)__pyx_v_player_1)); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 61, __pyx_L1_error)
+        __pyx_t_14 = __Pyx_PyList_Append(__pyx_v_next_participants, ((PyObject *)__pyx_v_player_1)); if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 128, __pyx_L1_error)
 
-        /* "cython_run_tournament.pyx":59
- *                 is_1_winner = rng.integers(2) == 0  # Random outcome if no history exists
+        /* "cython_run_tournament.pyx":126
  * 
+ *             # Update Elo ratings based on winner
  *             if is_1_winner:             # <<<<<<<<<<<<<<
- *                 update_elo(player_1, player_2, k, elo_formula)
+ *                 update_elo(player_1, player_2, current_k, elo_formula, match_outcome)
  *                 next_participants.append(player_1)
  */
-        goto __pyx_L8;
+        goto __pyx_L10;
       }
 
-      /* "cython_run_tournament.pyx":63
+      /* "cython_run_tournament.pyx":130
  *                 next_participants.append(player_1)
  *             else:
- *                 update_elo(player_2, player_1, k, elo_formula)             # <<<<<<<<<<<<<<
+ *                 update_elo(player_2, player_1, current_k, elo_formula, 1 - match_outcome)             # <<<<<<<<<<<<<<
  *                 next_participants.append(player_2)
  * 
  */
       /*else*/ {
-        __pyx_f_21cython_run_tournament_update_elo(__pyx_v_player_2, __pyx_v_player_1, __pyx_v_k, __pyx_v_elo_formula); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyInt_SubtractCObj(__pyx_int_1, __pyx_v_match_outcome, 1, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 130, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_12 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_12 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __pyx_f_21cython_run_tournament_update_elo(__pyx_v_player_2, __pyx_v_player_1, __pyx_v_current_k, __pyx_v_elo_formula, __pyx_t_12); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
 
-        /* "cython_run_tournament.pyx":64
+        /* "cython_run_tournament.pyx":131
  *             else:
- *                 update_elo(player_2, player_1, k, elo_formula)
+ *                 update_elo(player_2, player_1, current_k, elo_formula, 1 - match_outcome)
  *                 next_participants.append(player_2)             # <<<<<<<<<<<<<<
  * 
- *         participants = next_participants
+ *         # Prepare for the next round
  */
-        __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_next_participants, ((PyObject *)__pyx_v_player_2)); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 64, __pyx_L1_error)
+        __pyx_t_14 = __Pyx_PyList_Append(__pyx_v_next_participants, ((PyObject *)__pyx_v_player_2)); if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 131, __pyx_L1_error)
       }
-      __pyx_L8:;
+      __pyx_L10:;
 
-      /* "cython_run_tournament.pyx":49
- *     while len_participants > 1:
- *         next_participants = []
+      /* "cython_run_tournament.pyx":107
+ * 
+ *         # Simulate matches for the current round
  *         for i in range(0, len_participants, 2):             # <<<<<<<<<<<<<<
  *             player_1 = participants[i]
  *             player_2 = participants[i + 1]
@@ -5654,30 +6478,42 @@ static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED P
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-    /* "cython_run_tournament.pyx":66
- *                 next_participants.append(player_2)
+    /* "cython_run_tournament.pyx":134
  * 
+ *         # Prepare for the next round
  *         participants = next_participants             # <<<<<<<<<<<<<<
  *         len_participants = len(participants)
+ *         round_number += 1
  */
     __Pyx_INCREF(__pyx_v_next_participants);
     __Pyx_DECREF_SET(__pyx_v_participants, __pyx_v_next_participants);
 
-    /* "cython_run_tournament.pyx":67
- * 
+    /* "cython_run_tournament.pyx":135
+ *         # Prepare for the next round
  *         participants = next_participants
  *         len_participants = len(participants)             # <<<<<<<<<<<<<<
+ *         round_number += 1
+ * 
  */
-    __pyx_t_7 = PyObject_Length(__pyx_v_participants); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 67, __pyx_L1_error)
-    __pyx_v_len_participants = __pyx_t_7;
+    __pyx_t_9 = PyObject_Length(__pyx_v_participants); if (unlikely(__pyx_t_9 == ((Py_ssize_t)-1))) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_v_len_participants = __pyx_t_9;
+
+    /* "cython_run_tournament.pyx":136
+ *         participants = next_participants
+ *         len_participants = len(participants)
+ *         round_number += 1             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+    __pyx_v_round_number = (__pyx_v_round_number + 1);
   }
 
-  /* "cython_run_tournament.pyx":27
- *     loser.matches_played += 1
+  /* "cython_run_tournament.pyx":53
  * 
- * def run_tournament(list players, double k, int p, dict history, object elo_formula):             # <<<<<<<<<<<<<<
- *     """
- *     Simulate a tournament with p players randomly chosen.
+ * 
+ * def run_tournament(             # <<<<<<<<<<<<<<
+ *     list players,
+ *     int p,
  */
 
   /* function exit code */
@@ -5687,6 +6523,7 @@ static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED P
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_AddTraceback("cython_run_tournament.run_tournament", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -5698,7 +6535,10 @@ static PyObject *__pyx_pf_21cython_run_tournament_run_tournament(CYTHON_UNUSED P
   __Pyx_XDECREF(__pyx_v_rng);
   __Pyx_XDECREF(__pyx_v_participants);
   __Pyx_XDECREF(__pyx_v_i);
+  __Pyx_XDECREF(__pyx_v_winner_score);
+  __Pyx_XDECREF(__pyx_v_loser_score);
   __Pyx_XDECREF(__pyx_v_is_1_winner);
+  __Pyx_XDECREF(__pyx_v_match_outcome);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -5720,15 +6560,22 @@ static PyMethodDef __pyx_methods[] = {
 
 static int __Pyx_CreateStringTabAndInitStrings(void) {
   __Pyx_StringTabEntry __pyx_string_tab[] = {
+    {&__pyx_kp_u_Custom_K_array_is_smaller_than_t, __pyx_k_Custom_K_array_is_smaller_than_t, sizeof(__pyx_k_Custom_K_array_is_smaller_than_t), 0, 1, 0, 0},
     {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
+    {&__pyx_kp_u_Invalid_scaling_method_for_dynam, __pyx_k_Invalid_scaling_method_for_dynam, sizeof(__pyx_k_Invalid_scaling_method_for_dynam), 0, 1, 0, 0},
     {&__pyx_n_u_Loser_Score, __pyx_k_Loser_Score, sizeof(__pyx_k_Loser_Score), 0, 1, 0, 1},
+    {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
     {&__pyx_n_u_Winner_Score, __pyx_k_Winner_Score, sizeof(__pyx_k_Winner_Score), 0, 1, 0, 1},
-    {&__pyx_n_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 1},
-    {&__pyx_n_s__6, __pyx_k__6, sizeof(__pyx_k__6), 0, 0, 1, 1},
+    {&__pyx_n_s__5, __pyx_k__5, sizeof(__pyx_k__5), 0, 0, 1, 1},
+    {&__pyx_n_s__8, __pyx_k__8, sizeof(__pyx_k__8), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
+    {&__pyx_n_s_ceil, __pyx_k_ceil, sizeof(__pyx_k_ceil), 0, 0, 1, 1},
     {&__pyx_n_s_choice, __pyx_k_choice, sizeof(__pyx_k_choice), 0, 0, 1, 1},
     {&__pyx_n_s_class_getitem, __pyx_k_class_getitem, sizeof(__pyx_k_class_getitem), 0, 0, 1, 1},
     {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
+    {&__pyx_n_s_current_k, __pyx_k_current_k, sizeof(__pyx_k_current_k), 0, 0, 1, 1},
+    {&__pyx_n_u_custom, __pyx_k_custom, sizeof(__pyx_k_custom), 0, 1, 0, 1},
+    {&__pyx_n_s_custom_k, __pyx_k_custom_k, sizeof(__pyx_k_custom_k), 0, 0, 1, 1},
     {&__pyx_n_s_cython_run_tournament, __pyx_k_cython_run_tournament, sizeof(__pyx_k_cython_run_tournament), 0, 0, 1, 1},
     {&__pyx_kp_s_cython_run_tournament_pyx, __pyx_k_cython_run_tournament_pyx, sizeof(__pyx_k_cython_run_tournament_pyx), 0, 0, 1, 0},
     {&__pyx_n_s_default_rng, __pyx_k_default_rng, sizeof(__pyx_k_default_rng), 0, 0, 1, 1},
@@ -5741,8 +6588,16 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_is_1_winner, __pyx_k_is_1_winner, sizeof(__pyx_k_is_1_winner), 0, 0, 1, 1},
     {&__pyx_n_s_is_coroutine, __pyx_k_is_coroutine, sizeof(__pyx_k_is_coroutine), 0, 0, 1, 1},
     {&__pyx_n_s_k, __pyx_k_k, sizeof(__pyx_k_k), 0, 0, 1, 1},
+    {&__pyx_n_s_k_max, __pyx_k_k_max, sizeof(__pyx_k_k_max), 0, 0, 1, 1},
+    {&__pyx_n_s_k_min, __pyx_k_k_min, sizeof(__pyx_k_k_min), 0, 0, 1, 1},
+    {&__pyx_n_s_k_scaling, __pyx_k_k_scaling, sizeof(__pyx_k_k_scaling), 0, 0, 1, 1},
     {&__pyx_n_s_len_participants, __pyx_k_len_participants, sizeof(__pyx_k_len_participants), 0, 0, 1, 1},
+    {&__pyx_n_u_linear, __pyx_k_linear, sizeof(__pyx_k_linear), 0, 1, 0, 1},
+    {&__pyx_n_u_log, __pyx_k_log, sizeof(__pyx_k_log), 0, 1, 0, 1},
+    {&__pyx_n_s_log2, __pyx_k_log2, sizeof(__pyx_k_log2), 0, 0, 1, 1},
+    {&__pyx_n_s_loser_score, __pyx_k_loser_score, sizeof(__pyx_k_loser_score), 0, 0, 1, 1},
     {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
+    {&__pyx_n_s_match_outcome, __pyx_k_match_outcome, sizeof(__pyx_k_match_outcome), 0, 0, 1, 1},
     {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
     {&__pyx_n_s_next_participants, __pyx_k_next_participants, sizeof(__pyx_k_next_participants), 0, 0, 1, 1},
     {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
@@ -5758,19 +6613,27 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
     {&__pyx_n_s_replace, __pyx_k_replace, sizeof(__pyx_k_replace), 0, 0, 1, 1},
     {&__pyx_n_s_rng, __pyx_k_rng, sizeof(__pyx_k_rng), 0, 0, 1, 1},
+    {&__pyx_n_s_round_number, __pyx_k_round_number, sizeof(__pyx_k_round_number), 0, 0, 1, 1},
     {&__pyx_n_s_run_tournament, __pyx_k_run_tournament, sizeof(__pyx_k_run_tournament), 0, 0, 1, 1},
     {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
     {&__pyx_n_s_spec, __pyx_k_spec, sizeof(__pyx_k_spec), 0, 0, 1, 1},
+    {&__pyx_n_s_sqrt, __pyx_k_sqrt, sizeof(__pyx_k_sqrt), 0, 0, 1, 1},
+    {&__pyx_n_u_sqrt, __pyx_k_sqrt, sizeof(__pyx_k_sqrt), 0, 1, 0, 1},
+    {&__pyx_n_u_static, __pyx_k_static, sizeof(__pyx_k_static), 0, 1, 0, 1},
     {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
     {&__pyx_n_s_tolist, __pyx_k_tolist, sizeof(__pyx_k_tolist), 0, 0, 1, 1},
+    {&__pyx_n_s_total_rounds, __pyx_k_total_rounds, sizeof(__pyx_k_total_rounds), 0, 0, 1, 1},
     {&__pyx_n_s_update_rating, __pyx_k_update_rating, sizeof(__pyx_k_update_rating), 0, 0, 1, 1},
+    {&__pyx_n_s_v, __pyx_k_v, sizeof(__pyx_k_v), 0, 0, 1, 1},
+    {&__pyx_n_s_winner_score, __pyx_k_winner_score, sizeof(__pyx_k_winner_score), 0, 0, 1, 1},
     {0, 0, 0, 0, 0, 0, 0}
   };
   return __Pyx_InitStrings(__pyx_string_tab);
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 107, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 1043, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -5804,17 +6667,39 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "cython_run_tournament.pyx":27
- *     loser.matches_played += 1
+  /* "cython_run_tournament.pyx":28
+ *         return k_min + np.sqrt(round_num) / np.sqrt(total_rounds) * (k_max - k_min)
+ *     else:
+ *         raise ValueError("Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.")             # <<<<<<<<<<<<<<
  * 
- * def run_tournament(list players, double k, int p, dict history, object elo_formula):             # <<<<<<<<<<<<<<
- *     """
- *     Simulate a tournament with p players randomly chosen.
+ * cdef void update_elo(Player winner, Player loser, double k, object elo_formula, double match_outcome):
  */
-  __pyx_tuple__4 = PyTuple_Pack(13, __pyx_n_s_players, __pyx_n_s_k, __pyx_n_s_p, __pyx_n_s_history, __pyx_n_s_elo_formula, __pyx_n_s_len_participants, __pyx_n_s_player_1, __pyx_n_s_player_2, __pyx_n_s_next_participants, __pyx_n_s_rng, __pyx_n_s_participants, __pyx_n_s_i, __pyx_n_s_is_1_winner); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_Invalid_scaling_method_for_dynam); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__3);
+  __Pyx_GIVEREF(__pyx_tuple__3);
+
+  /* "cython_run_tournament.pyx":102
+ *                 current_k = custom_k[round_number - 1]
+ *             else:
+ *                 raise ValueError("Custom K array is smaller than the total number of rounds.")             # <<<<<<<<<<<<<<
+ *         else:
+ *             current_k = dynamic_k(round_number, total_rounds, k_min, k_max, k_scaling)
+ */
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_u_Custom_K_array_is_smaller_than_t); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cython_run_tournament_pyx, __pyx_n_s_run_tournament, 27, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 27, __pyx_L1_error)
+
+  /* "cython_run_tournament.pyx":53
+ * 
+ * 
+ * def run_tournament(             # <<<<<<<<<<<<<<
+ *     list players,
+ *     int p,
+ */
+  __pyx_tuple__6 = PyTuple_Pack(24, __pyx_n_s_players, __pyx_n_s_p, __pyx_n_s_history, __pyx_n_s_elo_formula, __pyx_n_s_v, __pyx_n_s_k_scaling, __pyx_n_s_k, __pyx_n_s_k_min, __pyx_n_s_k_max, __pyx_n_s_custom_k, __pyx_n_s_len_participants, __pyx_n_s_player_1, __pyx_n_s_player_2, __pyx_n_s_next_participants, __pyx_n_s_round_number, __pyx_n_s_total_rounds, __pyx_n_s_current_k, __pyx_n_s_rng, __pyx_n_s_participants, __pyx_n_s_i, __pyx_n_s_winner_score, __pyx_n_s_loser_score, __pyx_n_s_is_1_winner, __pyx_n_s_match_outcome); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(10, 0, 0, 24, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cython_run_tournament_pyx, __pyx_n_s_run_tournament, 53, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -6129,6 +7014,9 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_cython_run_tournament(PyObject *__
   #endif
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -6255,33 +7143,85 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_2) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "cython_run_tournament.pyx":27
- *     loser.matches_played += 1
- * 
- * def run_tournament(list players, double k, int p, dict history, object elo_formula):             # <<<<<<<<<<<<<<
- *     """
- *     Simulate a tournament with p players randomly chosen.
+  /* "cython_run_tournament.pyx":60
+ *     int v,
+ *     str k_scaling="sqrt",
+ *     double k=32,             # <<<<<<<<<<<<<<
+ *     double k_min=100,
+ *     double k_max=400,
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_21cython_run_tournament_1run_tournament, 0, __pyx_n_s_run_tournament, NULL, __pyx_n_s_cython_run_tournament, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(((double)32.0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_run_tournament, __pyx_t_2) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "cython_run_tournament.pyx":61
+ *     str k_scaling="sqrt",
+ *     double k=32,
+ *     double k_min=100,             # <<<<<<<<<<<<<<
+ *     double k_max=400,
+ *     list custom_k=None
+ */
+  __pyx_t_3 = PyFloat_FromDouble(((double)100.0)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+
+  /* "cython_run_tournament.pyx":62
+ *     double k=32,
+ *     double k_min=100,
+ *     double k_max=400,             # <<<<<<<<<<<<<<
+ *     list custom_k=None
+ * ):
+ */
+  __pyx_t_4 = PyFloat_FromDouble(((double)400.0)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+
+  /* "cython_run_tournament.pyx":53
+ * 
+ * 
+ * def run_tournament(             # <<<<<<<<<<<<<<
+ *     list players,
+ *     int p,
+ */
+  __pyx_t_5 = PyTuple_New(5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_INCREF(((PyObject*)__pyx_n_u_sqrt));
+  __Pyx_GIVEREF(((PyObject*)__pyx_n_u_sqrt));
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, ((PyObject*)__pyx_n_u_sqrt))) __PYX_ERR(0, 53, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_2);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_3);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_4);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 3, __pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error);
+  __Pyx_INCREF(Py_None);
+  __Pyx_GIVEREF(Py_None);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 4, Py_None)) __PYX_ERR(0, 53, __pyx_L1_error);
+  __pyx_t_2 = 0;
+  __pyx_t_3 = 0;
+  __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_21cython_run_tournament_1run_tournament, 0, __pyx_n_s_run_tournament, NULL, __pyx_n_s_cython_run_tournament, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_4, __pyx_t_5);
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_run_tournament, __pyx_t_4) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "cython_run_tournament.pyx":1
  * # cython_run_tournament.pyx             # <<<<<<<<<<<<<<
  * import numpy as np
  * cimport numpy as cnp
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_4) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /*--- Wrapped vars code ---*/
 
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
       __Pyx_AddTraceback("init cython_run_tournament", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -6867,6 +7807,224 @@ bad:
 }
 #endif
 
+/* BytesEquals */
+static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
+#if CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API
+    return PyObject_RichCompareBool(s1, s2, equals);
+#else
+    if (s1 == s2) {
+        return (equals == Py_EQ);
+    } else if (PyBytes_CheckExact(s1) & PyBytes_CheckExact(s2)) {
+        const char *ps1, *ps2;
+        Py_ssize_t length = PyBytes_GET_SIZE(s1);
+        if (length != PyBytes_GET_SIZE(s2))
+            return (equals == Py_NE);
+        ps1 = PyBytes_AS_STRING(s1);
+        ps2 = PyBytes_AS_STRING(s2);
+        if (ps1[0] != ps2[0]) {
+            return (equals == Py_NE);
+        } else if (length == 1) {
+            return (equals == Py_EQ);
+        } else {
+            int result;
+#if CYTHON_USE_UNICODE_INTERNALS && (PY_VERSION_HEX < 0x030B0000)
+            Py_hash_t hash1, hash2;
+            hash1 = ((PyBytesObject*)s1)->ob_shash;
+            hash2 = ((PyBytesObject*)s2)->ob_shash;
+            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
+                return (equals == Py_NE);
+            }
+#endif
+            result = memcmp(ps1, ps2, (size_t)length);
+            return (equals == Py_EQ) ? (result == 0) : (result != 0);
+        }
+    } else if ((s1 == Py_None) & PyBytes_CheckExact(s2)) {
+        return (equals == Py_NE);
+    } else if ((s2 == Py_None) & PyBytes_CheckExact(s1)) {
+        return (equals == Py_NE);
+    } else {
+        int result;
+        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
+        if (!py_result)
+            return -1;
+        result = __Pyx_PyObject_IsTrue(py_result);
+        Py_DECREF(py_result);
+        return result;
+    }
+#endif
+}
+
+/* UnicodeEquals */
+static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
+#if CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API
+    return PyObject_RichCompareBool(s1, s2, equals);
+#else
+#if PY_MAJOR_VERSION < 3
+    PyObject* owned_ref = NULL;
+#endif
+    int s1_is_unicode, s2_is_unicode;
+    if (s1 == s2) {
+        goto return_eq;
+    }
+    s1_is_unicode = PyUnicode_CheckExact(s1);
+    s2_is_unicode = PyUnicode_CheckExact(s2);
+#if PY_MAJOR_VERSION < 3
+    if ((s1_is_unicode & (!s2_is_unicode)) && PyString_CheckExact(s2)) {
+        owned_ref = PyUnicode_FromObject(s2);
+        if (unlikely(!owned_ref))
+            return -1;
+        s2 = owned_ref;
+        s2_is_unicode = 1;
+    } else if ((s2_is_unicode & (!s1_is_unicode)) && PyString_CheckExact(s1)) {
+        owned_ref = PyUnicode_FromObject(s1);
+        if (unlikely(!owned_ref))
+            return -1;
+        s1 = owned_ref;
+        s1_is_unicode = 1;
+    } else if (((!s2_is_unicode) & (!s1_is_unicode))) {
+        return __Pyx_PyBytes_Equals(s1, s2, equals);
+    }
+#endif
+    if (s1_is_unicode & s2_is_unicode) {
+        Py_ssize_t length;
+        int kind;
+        void *data1, *data2;
+        if (unlikely(__Pyx_PyUnicode_READY(s1) < 0) || unlikely(__Pyx_PyUnicode_READY(s2) < 0))
+            return -1;
+        length = __Pyx_PyUnicode_GET_LENGTH(s1);
+        if (length != __Pyx_PyUnicode_GET_LENGTH(s2)) {
+            goto return_ne;
+        }
+#if CYTHON_USE_UNICODE_INTERNALS
+        {
+            Py_hash_t hash1, hash2;
+        #if CYTHON_PEP393_ENABLED
+            hash1 = ((PyASCIIObject*)s1)->hash;
+            hash2 = ((PyASCIIObject*)s2)->hash;
+        #else
+            hash1 = ((PyUnicodeObject*)s1)->hash;
+            hash2 = ((PyUnicodeObject*)s2)->hash;
+        #endif
+            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
+                goto return_ne;
+            }
+        }
+#endif
+        kind = __Pyx_PyUnicode_KIND(s1);
+        if (kind != __Pyx_PyUnicode_KIND(s2)) {
+            goto return_ne;
+        }
+        data1 = __Pyx_PyUnicode_DATA(s1);
+        data2 = __Pyx_PyUnicode_DATA(s2);
+        if (__Pyx_PyUnicode_READ(kind, data1, 0) != __Pyx_PyUnicode_READ(kind, data2, 0)) {
+            goto return_ne;
+        } else if (length == 1) {
+            goto return_eq;
+        } else {
+            int result = memcmp(data1, data2, (size_t)(length * kind));
+            #if PY_MAJOR_VERSION < 3
+            Py_XDECREF(owned_ref);
+            #endif
+            return (equals == Py_EQ) ? (result == 0) : (result != 0);
+        }
+    } else if ((s1 == Py_None) & s2_is_unicode) {
+        goto return_ne;
+    } else if ((s2 == Py_None) & s1_is_unicode) {
+        goto return_ne;
+    } else {
+        int result;
+        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
+        #if PY_MAJOR_VERSION < 3
+        Py_XDECREF(owned_ref);
+        #endif
+        if (!py_result)
+            return -1;
+        result = __Pyx_PyObject_IsTrue(py_result);
+        Py_DECREF(py_result);
+        return result;
+    }
+return_eq:
+    #if PY_MAJOR_VERSION < 3
+    Py_XDECREF(owned_ref);
+    #endif
+    return (equals == Py_EQ);
+return_ne:
+    #if PY_MAJOR_VERSION < 3
+    Py_XDECREF(owned_ref);
+    #endif
+    return (equals == Py_NE);
+#endif
+}
+
+/* PyDictVersioning */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
+    PyObject **dictptr = NULL;
+    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
+    if (offset) {
+#if CYTHON_COMPILING_IN_CPYTHON
+        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
+#else
+        dictptr = _PyObject_GetDictPtr(obj);
+#endif
+    }
+    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
+}
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
+        return 0;
+    return obj_dict_version == __Pyx_get_object_dict_version(obj);
+}
+#endif
+
+/* GetModuleGlobalName */
+#if CYTHON_USE_DICT_VERSIONS
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
+#else
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
+#endif
+{
+    PyObject *result;
+#if !CYTHON_AVOID_BORROWED_REFS
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1 && PY_VERSION_HEX < 0x030d0000
+    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    } else if (unlikely(PyErr_Occurred())) {
+        return NULL;
+    }
+#elif CYTHON_COMPILING_IN_LIMITED_API
+    if (unlikely(!__pyx_m)) {
+        return NULL;
+    }
+    result = PyObject_GetAttr(__pyx_m, name);
+    if (likely(result)) {
+        return result;
+    }
+#else
+    result = PyDict_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+#endif
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+    PyErr_Clear();
+#endif
+    return __Pyx_GetBuiltinName(name);
+}
+
 /* PyFunctionFastCall */
 #if CYTHON_FAST_PYCALL && !CYTHON_VECTORCALL
 static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
@@ -7130,155 +8288,6 @@ __Pyx_PyList_FromArray(PyObject *const *src, Py_ssize_t n)
 }
 #endif
 
-/* BytesEquals */
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
-#if CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API
-    return PyObject_RichCompareBool(s1, s2, equals);
-#else
-    if (s1 == s2) {
-        return (equals == Py_EQ);
-    } else if (PyBytes_CheckExact(s1) & PyBytes_CheckExact(s2)) {
-        const char *ps1, *ps2;
-        Py_ssize_t length = PyBytes_GET_SIZE(s1);
-        if (length != PyBytes_GET_SIZE(s2))
-            return (equals == Py_NE);
-        ps1 = PyBytes_AS_STRING(s1);
-        ps2 = PyBytes_AS_STRING(s2);
-        if (ps1[0] != ps2[0]) {
-            return (equals == Py_NE);
-        } else if (length == 1) {
-            return (equals == Py_EQ);
-        } else {
-            int result;
-#if CYTHON_USE_UNICODE_INTERNALS && (PY_VERSION_HEX < 0x030B0000)
-            Py_hash_t hash1, hash2;
-            hash1 = ((PyBytesObject*)s1)->ob_shash;
-            hash2 = ((PyBytesObject*)s2)->ob_shash;
-            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
-                return (equals == Py_NE);
-            }
-#endif
-            result = memcmp(ps1, ps2, (size_t)length);
-            return (equals == Py_EQ) ? (result == 0) : (result != 0);
-        }
-    } else if ((s1 == Py_None) & PyBytes_CheckExact(s2)) {
-        return (equals == Py_NE);
-    } else if ((s2 == Py_None) & PyBytes_CheckExact(s1)) {
-        return (equals == Py_NE);
-    } else {
-        int result;
-        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
-        if (!py_result)
-            return -1;
-        result = __Pyx_PyObject_IsTrue(py_result);
-        Py_DECREF(py_result);
-        return result;
-    }
-#endif
-}
-
-/* UnicodeEquals */
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
-#if CYTHON_COMPILING_IN_PYPY || CYTHON_COMPILING_IN_LIMITED_API
-    return PyObject_RichCompareBool(s1, s2, equals);
-#else
-#if PY_MAJOR_VERSION < 3
-    PyObject* owned_ref = NULL;
-#endif
-    int s1_is_unicode, s2_is_unicode;
-    if (s1 == s2) {
-        goto return_eq;
-    }
-    s1_is_unicode = PyUnicode_CheckExact(s1);
-    s2_is_unicode = PyUnicode_CheckExact(s2);
-#if PY_MAJOR_VERSION < 3
-    if ((s1_is_unicode & (!s2_is_unicode)) && PyString_CheckExact(s2)) {
-        owned_ref = PyUnicode_FromObject(s2);
-        if (unlikely(!owned_ref))
-            return -1;
-        s2 = owned_ref;
-        s2_is_unicode = 1;
-    } else if ((s2_is_unicode & (!s1_is_unicode)) && PyString_CheckExact(s1)) {
-        owned_ref = PyUnicode_FromObject(s1);
-        if (unlikely(!owned_ref))
-            return -1;
-        s1 = owned_ref;
-        s1_is_unicode = 1;
-    } else if (((!s2_is_unicode) & (!s1_is_unicode))) {
-        return __Pyx_PyBytes_Equals(s1, s2, equals);
-    }
-#endif
-    if (s1_is_unicode & s2_is_unicode) {
-        Py_ssize_t length;
-        int kind;
-        void *data1, *data2;
-        if (unlikely(__Pyx_PyUnicode_READY(s1) < 0) || unlikely(__Pyx_PyUnicode_READY(s2) < 0))
-            return -1;
-        length = __Pyx_PyUnicode_GET_LENGTH(s1);
-        if (length != __Pyx_PyUnicode_GET_LENGTH(s2)) {
-            goto return_ne;
-        }
-#if CYTHON_USE_UNICODE_INTERNALS
-        {
-            Py_hash_t hash1, hash2;
-        #if CYTHON_PEP393_ENABLED
-            hash1 = ((PyASCIIObject*)s1)->hash;
-            hash2 = ((PyASCIIObject*)s2)->hash;
-        #else
-            hash1 = ((PyUnicodeObject*)s1)->hash;
-            hash2 = ((PyUnicodeObject*)s2)->hash;
-        #endif
-            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
-                goto return_ne;
-            }
-        }
-#endif
-        kind = __Pyx_PyUnicode_KIND(s1);
-        if (kind != __Pyx_PyUnicode_KIND(s2)) {
-            goto return_ne;
-        }
-        data1 = __Pyx_PyUnicode_DATA(s1);
-        data2 = __Pyx_PyUnicode_DATA(s2);
-        if (__Pyx_PyUnicode_READ(kind, data1, 0) != __Pyx_PyUnicode_READ(kind, data2, 0)) {
-            goto return_ne;
-        } else if (length == 1) {
-            goto return_eq;
-        } else {
-            int result = memcmp(data1, data2, (size_t)(length * kind));
-            #if PY_MAJOR_VERSION < 3
-            Py_XDECREF(owned_ref);
-            #endif
-            return (equals == Py_EQ) ? (result == 0) : (result != 0);
-        }
-    } else if ((s1 == Py_None) & s2_is_unicode) {
-        goto return_ne;
-    } else if ((s2 == Py_None) & s1_is_unicode) {
-        goto return_ne;
-    } else {
-        int result;
-        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
-        #if PY_MAJOR_VERSION < 3
-        Py_XDECREF(owned_ref);
-        #endif
-        if (!py_result)
-            return -1;
-        result = __Pyx_PyObject_IsTrue(py_result);
-        Py_DECREF(py_result);
-        return result;
-    }
-return_eq:
-    #if PY_MAJOR_VERSION < 3
-    Py_XDECREF(owned_ref);
-    #endif
-    return (equals == Py_EQ);
-return_ne:
-    #if PY_MAJOR_VERSION < 3
-    Py_XDECREF(owned_ref);
-    #endif
-    return (equals == Py_NE);
-#endif
-}
-
 /* fastcall */
 #if CYTHON_METH_FASTCALL
 static CYTHON_INLINE PyObject * __Pyx_GetKwValue_FASTCALL(PyObject *kwnames, PyObject *const *kwvalues, PyObject *s)
@@ -7539,75 +8548,6 @@ static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *nam
     __Pyx_DECREF_TypeName(type_name);
     __Pyx_DECREF_TypeName(obj_type_name);
     return 0;
-}
-
-/* PyDictVersioning */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
-    PyObject **dictptr = NULL;
-    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
-    if (offset) {
-#if CYTHON_COMPILING_IN_CPYTHON
-        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
-#else
-        dictptr = _PyObject_GetDictPtr(obj);
-#endif
-    }
-    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
-}
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
-        return 0;
-    return obj_dict_version == __Pyx_get_object_dict_version(obj);
-}
-#endif
-
-/* GetModuleGlobalName */
-#if CYTHON_USE_DICT_VERSIONS
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
-#else
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
-#endif
-{
-    PyObject *result;
-#if !CYTHON_AVOID_BORROWED_REFS
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1 && PY_VERSION_HEX < 0x030d0000
-    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    } else if (unlikely(PyErr_Occurred())) {
-        return NULL;
-    }
-#elif CYTHON_COMPILING_IN_LIMITED_API
-    if (unlikely(!__pyx_m)) {
-        return NULL;
-    }
-    result = PyObject_GetAttr(__pyx_m, name);
-    if (likely(result)) {
-        return result;
-    }
-#else
-    result = PyDict_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-#endif
-#else
-    result = PyObject_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-    PyErr_Clear();
-#endif
-    return __Pyx_GetBuiltinName(name);
 }
 
 /* GetItemInt */
@@ -8010,6 +8950,139 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, 
         PyObject_RichCompare(op1, op2, Py_EQ));
 }
 
+/* PyIntBinop */
+#if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_SubtractCObj(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check) {
+    CYTHON_MAYBE_UNUSED_VAR(intval);
+    CYTHON_MAYBE_UNUSED_VAR(inplace);
+    CYTHON_UNUSED_VAR(zerodivision_check);
+    #if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_CheckExact(op2))) {
+        const long a = intval;
+        long x;
+        long b = PyInt_AS_LONG(op2);
+        
+            x = (long)((unsigned long)a - (unsigned long)b);
+            if (likely((x^a) >= 0 || (x^~b) >= 0))
+                return PyInt_FromLong(x);
+            return PyLong_Type.tp_as_number->nb_subtract(op1, op2);
+    }
+    #endif
+    #if CYTHON_USE_PYLONG_INTERNALS
+    if (likely(PyLong_CheckExact(op2))) {
+        const long a = intval;
+        long b, x;
+#ifdef HAVE_LONG_LONG
+        const PY_LONG_LONG lla = intval;
+        PY_LONG_LONG llb, llx;
+#endif
+        if (unlikely(__Pyx_PyLong_IsZero(op2))) {
+            return __Pyx_NewRef(op1);
+        }
+        if (likely(__Pyx_PyLong_IsCompact(op2))) {
+            b = __Pyx_PyLong_CompactValue(op2);
+        } else {
+            const digit* digits = __Pyx_PyLong_Digits(op2);
+            const Py_ssize_t size = __Pyx_PyLong_SignedDigitCount(op2);
+            switch (size) {
+                case -2:
+                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
+                        b = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    #ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
+                        llb = -(PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+                    #endif
+                    }
+                    CYTHON_FALLTHROUGH;
+                case 2:
+                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
+                        b = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    #ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
+                        llb = (PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+                    #endif
+                    }
+                    CYTHON_FALLTHROUGH;
+                case -3:
+                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
+                        b = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    #ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
+                        llb = -(PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+                    #endif
+                    }
+                    CYTHON_FALLTHROUGH;
+                case 3:
+                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
+                        b = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    #ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
+                        llb = (PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+                    #endif
+                    }
+                    CYTHON_FALLTHROUGH;
+                case -4:
+                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
+                        b = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    #ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
+                        llb = -(PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+                    #endif
+                    }
+                    CYTHON_FALLTHROUGH;
+                case 4:
+                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
+                        b = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
+                        break;
+                    #ifdef HAVE_LONG_LONG
+                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
+                        llb = (PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
+                        goto long_long;
+                    #endif
+                    }
+                    CYTHON_FALLTHROUGH;
+                default: return PyLong_Type.tp_as_number->nb_subtract(op1, op2);
+            }
+        }
+                x = a - b;
+            return PyLong_FromLong(x);
+#ifdef HAVE_LONG_LONG
+        long_long:
+                llx = lla - llb;
+            return PyLong_FromLongLong(llx);
+#endif
+        
+        
+    }
+    #endif
+    if (PyFloat_CheckExact(op2)) {
+        const long a = intval;
+#if CYTHON_COMPILING_IN_LIMITED_API
+        double b = __pyx_PyFloat_AsDouble(op2);
+#else
+        double b = PyFloat_AS_DOUBLE(op2);
+#endif
+            double result;
+            
+            PyFPE_START_PROTECT("subtract", return NULL)
+            result = ((double)a) - (double)b;
+            PyFPE_END_PROTECT(result)
+            return PyFloat_FromDouble(result);
+    }
+    return (inplace ? PyNumber_InPlaceSubtract : PyNumber_Subtract)(op1, op2);
+}
+#endif
+
 /* TypeImport */
 #ifndef __PYX_HAVE_RT_ImportType_3_0_11
 #define __PYX_HAVE_RT_ImportType_3_0_11
@@ -8226,7 +9299,7 @@ static PyObject *__Pyx_ImportDottedModule_WalkParts(PyObject *module, PyObject *
 #endif
 static PyObject *__Pyx__ImportDottedModule(PyObject *name, PyObject *parts_tuple) {
 #if PY_MAJOR_VERSION < 3
-    PyObject *module, *from_list, *star = __pyx_n_s__3;
+    PyObject *module, *from_list, *star = __pyx_n_s__5;
     CYTHON_UNUSED_VAR(parts_tuple);
     from_list = PyList_New(1);
     if (unlikely(!from_list))
@@ -10598,6 +11671,77 @@ raise_neg_overflow:
 }
 
 /* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+    const long neg_one = (long) -1, const_zero = (long) 0;
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic pop
+#endif
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        unsigned char *bytes = (unsigned char *)&value;
+#if !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX >= 0x030d00A4
+        if (is_unsigned) {
+            return PyLong_FromUnsignedNativeBytes(bytes, sizeof(value), -1);
+        } else {
+            return PyLong_FromNativeBytes(bytes, sizeof(value), -1);
+        }
+#elif !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX < 0x030d0000
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        return _PyLong_FromByteArray(bytes, sizeof(long),
+                                     little, !is_unsigned);
+#else
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        PyObject *from_bytes, *result = NULL;
+        PyObject *py_bytes = NULL, *arg_tuple = NULL, *kwds = NULL, *order_str = NULL;
+        from_bytes = PyObject_GetAttrString((PyObject*)&PyLong_Type, "from_bytes");
+        if (!from_bytes) return NULL;
+        py_bytes = PyBytes_FromStringAndSize((char*)bytes, sizeof(long));
+        if (!py_bytes) goto limited_bad;
+        order_str = PyUnicode_FromString(little ? "little" : "big");
+        if (!order_str) goto limited_bad;
+        arg_tuple = PyTuple_Pack(2, py_bytes, order_str);
+        if (!arg_tuple) goto limited_bad;
+        if (!is_unsigned) {
+            kwds = PyDict_New();
+            if (!kwds) goto limited_bad;
+            if (PyDict_SetItemString(kwds, "signed", __Pyx_NewRef(Py_True))) goto limited_bad;
+        }
+        result = PyObject_Call(from_bytes, arg_tuple, kwds);
+        limited_bad:
+        Py_XDECREF(kwds);
+        Py_XDECREF(arg_tuple);
+        Py_XDECREF(order_str);
+        Py_XDECREF(py_bytes);
+        Py_XDECREF(from_bytes);
+        return result;
+#endif
+    }
+}
+
+/* CIntToPy */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
 #ifdef __Pyx_HAS_GCC_DIAGNOSTIC
 #pragma GCC diagnostic push
@@ -10678,82 +11822,11 @@ __Pyx_PyType_GetName(PyTypeObject* tp)
     if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
         PyErr_Clear();
         Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__6);
+        name = __Pyx_NewRef(__pyx_n_s__8);
     }
     return name;
 }
 #endif
-
-/* CIntToPy */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
-    const long neg_one = (long) -1, const_zero = (long) 0;
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic pop
-#endif
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        unsigned char *bytes = (unsigned char *)&value;
-#if !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX >= 0x030d00A4
-        if (is_unsigned) {
-            return PyLong_FromUnsignedNativeBytes(bytes, sizeof(value), -1);
-        } else {
-            return PyLong_FromNativeBytes(bytes, sizeof(value), -1);
-        }
-#elif !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX < 0x030d0000
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        return _PyLong_FromByteArray(bytes, sizeof(long),
-                                     little, !is_unsigned);
-#else
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        PyObject *from_bytes, *result = NULL;
-        PyObject *py_bytes = NULL, *arg_tuple = NULL, *kwds = NULL, *order_str = NULL;
-        from_bytes = PyObject_GetAttrString((PyObject*)&PyLong_Type, "from_bytes");
-        if (!from_bytes) return NULL;
-        py_bytes = PyBytes_FromStringAndSize((char*)bytes, sizeof(long));
-        if (!py_bytes) goto limited_bad;
-        order_str = PyUnicode_FromString(little ? "little" : "big");
-        if (!order_str) goto limited_bad;
-        arg_tuple = PyTuple_Pack(2, py_bytes, order_str);
-        if (!arg_tuple) goto limited_bad;
-        if (!is_unsigned) {
-            kwds = PyDict_New();
-            if (!kwds) goto limited_bad;
-            if (PyDict_SetItemString(kwds, "signed", __Pyx_NewRef(Py_True))) goto limited_bad;
-        }
-        result = PyObject_Call(from_bytes, arg_tuple, kwds);
-        limited_bad:
-        Py_XDECREF(kwds);
-        Py_XDECREF(arg_tuple);
-        Py_XDECREF(order_str);
-        Py_XDECREF(py_bytes);
-        Py_XDECREF(from_bytes);
-        return result;
-#endif
-    }
-}
 
 /* CIntFromPy */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
