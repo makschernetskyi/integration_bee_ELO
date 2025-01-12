@@ -20,10 +20,9 @@ def create_objective_function(mode="dynamic"):
         Generalized objective function based on mode.
         """
         if mode == "dynamic":
-            k_min = trial.suggest_float("k_min", 10, 200)
-            k_max = trial.suggest_float("k_max", 200, 800)
-            #k_scaling = trial.suggest_categorical("k_scaling", ["linear", "log", "sqrt"])
-            k_scaling = "sqrt"
+            k_min = trial.suggest_float("k_min", 10, 100)
+            k_max = trial.suggest_float("k_max", 100, 800)
+            k_scaling = "sqrt"  # Fixed scaling type
             custom_k = None
             k = None
         elif mode == "static":
@@ -35,25 +34,34 @@ def create_objective_function(mode="dynamic"):
         else:
             raise ValueError("Invalid mode. Choose from 'dynamic', 'static', or 'custom'.")
 
-        decay_factor = trial.suggest_float("decay_factor", 0.1, 0.5)
-        initial_score = trial.suggest_int("initial_score", 300, 800)
-        tau = trial.suggest_float("tau", 50, 200)
+        # New parameters for deviation multiplier
+        max_deviation_multiplier = trial.suggest_float("max_deviation_multiplier", 1.0, 20.0)
+        deviation_scaling_factor = trial.suggest_float("deviation_scaling_factor", 10.0, 200.0)
+        base_multiplier_factor = trial.suggest_float("base_multiplier_factor", 0.0, 1.0)
 
-        num_simulations = 10
+        # Other parameters
+        decay_factor = trial.suggest_float("decay_factor", 0.0, 0.5)
+        initial_score = trial.suggest_int("initial_score", 300, 800)
+        tau = trial.suggest_float("tau", 20, 200)
+
+        num_simulations = 10  # Number of simulations for averaging
 
         def run_simulation():
             final_ratings, snapshots, player_ids = simulate_elo(
-                m=100,
-                p=16,
-                n=100,
-                k=k,
+                num_players=100,
+                players_per_tournament=16,
+                num_tournaments=1000,
+                base_k=k,
                 elo_formula=get_expected_score(tau),
                 decay_factor=decay_factor,
-                initial_score=initial_score,
+                initial_rating=initial_score,
                 k_min=k_min,
                 k_max=k_max,
                 k_scaling=k_scaling,
-                custom_k=custom_k
+                custom_k_factors=custom_k,
+                max_deviation_multiplier=max_deviation_multiplier,
+                deviation_scaling_factor=deviation_scaling_factor,
+                base_multiplier_factor=base_multiplier_factor,
             )
             ratings = [player.rating for player in final_ratings]
             return combined_metric_with_constraints(ratings, snapshots)

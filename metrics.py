@@ -89,7 +89,7 @@ def combined_metric_with_constraints(
         snapshots (ndarray): Snapshots of ratings over time.
         target_skew (float): Desired skewness value.
         target_kurtosis (float): Desired kurtosis value.
-        weights (dict): Weights for each metric (keys: skew, kurtosis, drift, convergence, top_performance).
+        weights (dict): Weights for each metric (keys: skew, kurtosis, drift, convergence, top_performance, out_of_bounds).
         convergence_window (int): Number of rounds to consider for convergence evaluation.
 
     Returns:
@@ -97,13 +97,16 @@ def combined_metric_with_constraints(
     """
     if weights is None:
         weights = {
-            "skew": 8.0,
+            "skew": 10.0,
             "kurtosis": 0,
-            "drift": 3,
-            "convergence": 1,
+            "drift": 0,
+            "convergence": 0,
             "top_performance": 4.0,
-            "penalty": 15.0,
+            "out_of_bounds": 50.0,  # Penalty weight for out-of-bounds ratings
         }
+
+    final_ratings = np.array(final_ratings)
+
 
     # Calculate scalar metrics
     skewness = calculate_skew(final_ratings)
@@ -124,20 +127,26 @@ def combined_metric_with_constraints(
 
     # Constraint penalties
     skew_penalty = (
-        0 if 0.5 <= skewness <= 1.5 else weights["penalty"] * abs(skewness - target_skew)
+        0 if 0.5 <= skewness <= 1.5 else weights["skew"] * abs(skewness - target_skew)
     )
     kurt_penalty = (
-        0 if 3 <= kurt <= 5 else weights["penalty"] * abs(kurt - target_kurtosis)
+        0 if 3 <= kurt <= 5 else weights["kurtosis"] * abs(kurt - target_kurtosis)
     )
+
+    # Efficient penalty for out-of-bounds ratings using NumPy
+    out_of_bounds_count = np.sum((final_ratings > 2500) | (final_ratings < 0))
+    out_of_bounds_penalty = out_of_bounds_count * weights["out_of_bounds"]
 
     # Combined metric
     combined_score = (
-        weights["skew"] * skew_penalty
-        + weights["kurtosis"] * kurt_penalty
+        skew_penalty
+        + kurt_penalty
         - weights["drift"] * drift  # Higher drift is better
         - weights["convergence"] * convergence_rate  # Higher stabilization trend is better
         + weights["top_performance"] * top_performance_penalty  # Align top performers
+        + out_of_bounds_penalty  # Penalize out-of-bounds ratings
     )
 
     return combined_score
+
 

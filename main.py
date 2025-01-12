@@ -4,36 +4,46 @@ import matplotlib.pyplot as plt
 import statistics
 import numpy as np
 from scipy import stats
+from metrics import calculate_convergence_rate
+from tqdm import tqdm
+import seaborn as sns
+import pandas as pd
 
 
-if __name__ == "__main__":
-    m = 100  # Number of players <328
-    p = 16   # Players per tournament
-    n = 100  # Number of tournaments
-    k = 298  # K-factor
-    k_min = 31
-    k_max = 689
-    decay_factor = 0.42
-    initial_score = 558
-    tau = 180
-    k_scaling = "sqrt"
-
-    # Optimal
-    # Parameters:
-    # k_min: 31.394278644353776
-    # k_max: 689.9999590760938
-    # decay_factor: 0.4272370276873543
-    # initial_score: 558
-    # tau: 179.69165663105943
-    # Best
-    # Metric
-    # Score: 92.6332
+def run_single_simulation():
+    num_players = 100  # Number of players <328
+    players_per_tournament = 16  # Players per tournament
+    num_tournaments = 5000  # Number of tournaments
+    base_k = 32  # K-factor
+    k_min = 14.4  # Increased to amplify dynamic K-factors
+    k_max = 171.1  # Increased to reward top performers more in later rounds
+    decay_factor = 0  # Added a small decay factor to stabilize ratings over time
+    initial_rating = 700  # Reduced slightly to create more spread in the ratings
+    tau = 58  # Reduced to increase the gap impact in the expected score calculation
+    k_scaling = "sqrt"  # "sqrt" scaling tends to favor higher-rated players
+    max_deviation_multiplier = 2
+    deviation_scaling_factor = 184
+    base_multiplier_factor = 0.1
 
     # Start timing
     start_time = time.time()
 
     # Run the simulation
-    final_ratings, snapshots, player_ids = simulate_elo(m=m, p=p, n=n, elo_formula=get_expected_score(tau), decay_factor=decay_factor, initial_score=initial_score, k_min=k_min, k_max=k_max, k_scaling=k_scaling)
+    final_ratings, snapshots, player_ids = simulate_elo(
+        num_players=num_players,
+        players_per_tournament=players_per_tournament,
+        num_tournaments=num_tournaments,
+        elo_formula=get_expected_score(tau),
+        decay_factor=decay_factor,
+        initial_rating=initial_rating,
+        k_scaling=k_scaling,
+        k_min=k_min,
+        k_max=k_max,
+        base_k=base_k,
+        max_deviation_multiplier=max_deviation_multiplier,
+        deviation_scaling_factor=deviation_scaling_factor,
+        base_multiplier_factor=base_multiplier_factor,
+    )
 
     # End timing
     end_time = time.time()
@@ -58,9 +68,125 @@ if __name__ == "__main__":
     print(f"Median Rating: {statistics.median(ratings):.2f}")
 
     # Plot and save distribution
-    plt.hist(ratings, bins=10, edgecolor='black')
+    plt.hist(ratings, bins=10, edgecolor="black")
     plt.title("Elo Ratings Distribution")
     plt.xlabel("Rating")
     plt.ylabel("Frequency")
     plt.savefig("ratings_distribution.png")
     plt.show()
+
+
+
+def run_n_simulations(num_simulations=10):
+    num_players = 100  # Number of players <328
+    players_per_tournament = 16  # Players per tournament
+    num_tournaments = 1000  # Number of tournaments
+    base_k = 64  # K-factor
+    k_min = 14.4  # Increased to amplify dynamic K-factors
+    k_max = 171.1  # Increased to reward top performers more in later rounds
+    decay_factor = 0.29  # Added a small decay factor to stabilize ratings over time
+    initial_rating = 700  # Reduced slightly to create more spread in the ratings
+    tau = 58  # Reduced to increase the gap impact in the expected score calculation
+    k_scaling = "sqrt"  # "sqrt" scaling tends to favor higher-rated players
+    max_deviation_multiplier = 2
+    deviation_scaling_factor = 184
+    base_multiplier_factor = 0.1
+
+    metrics = {
+        "variance": [],
+        "deviation": [],
+        "skew": [],
+        "highest_rating": [],
+        "lowest_rating": [],
+        "mean_rating": [],
+        "median_rating": [],
+        "mean_drift": [],
+        "convergence": []
+    }
+
+    print("Running multiple Elo simulations and collecting metrics...")
+
+    # Use tqdm for progress bar
+    with tqdm(total=num_simulations, desc="Simulations Progress") as progress_bar:
+        for sim in range(num_simulations):
+            start_time = time.time()
+
+            # Run the simulation
+            final_ratings, snapshots, player_ids = simulate_elo(
+                num_players=num_players,
+                players_per_tournament=players_per_tournament,
+                num_tournaments=num_tournaments,
+                elo_formula=get_expected_score(tau),
+                decay_factor=decay_factor,
+                initial_rating=initial_rating,
+                k_scaling=k_scaling,
+                k_min=k_min,
+                k_max=k_max,
+                base_k=base_k,
+                max_deviation_multiplier=max_deviation_multiplier,
+                deviation_scaling_factor=deviation_scaling_factor,
+                base_multiplier_factor=base_multiplier_factor,
+            )
+
+            end_time = time.time()
+            progress_bar.set_postfix({"Simulation Time (s)": f"{end_time - start_time:.2f}"})
+            progress_bar.update(1)
+
+            # Gather ratings and metrics
+            ratings = [player.rating for player in final_ratings]
+            metrics["variance"].append(statistics.variance(ratings))
+            metrics["deviation"].append(np.sqrt(statistics.variance(ratings)))
+            metrics["skew"].append(stats.skew(np.array(ratings)))
+            metrics["highest_rating"].append(max(ratings))
+            metrics["lowest_rating"].append(min(ratings))
+            metrics["mean_rating"].append(statistics.mean(ratings))
+            metrics["median_rating"].append(statistics.median(ratings))
+            metrics["mean_drift"].append(np.mean(np.abs(np.diff(snapshots, axis=1))))  # Drift
+            metrics["convergence"].append(calculate_convergence_rate(snapshots, window=5))  # Convergence rate
+
+    # Compute mean values
+    mean_metrics = {key: np.mean(value) for key, value in metrics.items()}
+
+    # Output mean values to console
+    print("\nAverage Metrics Across Simulations:")
+    for key, value in mean_metrics.items():
+        print(f"{key.replace('_', ' ').capitalize()}: {value:.2f}")
+
+    # Prepare data for correlation matrix
+    metrics_df = pd.DataFrame(metrics)
+
+    # Compute correlation matrix
+    correlation_matrix = metrics_df.corr()
+
+    # Plot correlation matrix
+    # plt.figure(figsize=(10, 8))
+    # sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap="coolwarm")
+    # plt.title("Correlation Matrix of Metrics")
+    # plt.savefig("correlation_matrix.png")
+    # plt.show()
+
+    # Plot individual metrics
+    num_metrics = len(metrics)
+    fig, axes = plt.subplots(nrows=(num_metrics // 3) + 1, ncols=3, figsize=(15, 10))
+    axes = axes.flatten()
+
+    for i, (metric_name, metric_values) in enumerate(metrics.items()):
+        ax = axes[i]
+        ax.plot(range(1, num_simulations + 1), metric_values, label=metric_name, marker="o")
+        ax.set_title(metric_name.replace("_", " ").capitalize())
+        ax.set_xlabel("Simulation Number")
+        ax.set_ylabel("Metric Value")
+        ax.legend()
+
+    # Remove any unused subplots
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+
+    plt.tight_layout()
+    plt.savefig("metrics_individual_plots.png")
+    plt.show()
+
+
+if __name__ == "__main__":
+    run_single_simulation()
+

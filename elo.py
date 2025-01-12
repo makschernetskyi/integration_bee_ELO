@@ -85,77 +85,92 @@ def load_players_and_history(n_players, n_tournaments, games_per_tournament=15, 
 
 
 def simulate_elo(
-    m: int,
-    p: int,
-    n: int,
+    num_players: int,
+    players_per_tournament: int,
+    num_tournaments: int,
     elo_formula: Callable,
     decay_factor: float = 0.3,
-    initial_score: int = 500,
+    initial_rating: int = 500,
     k_scaling: str = "sqrt",  # Scaling type for dynamic K-factor
     k_min: float = None,      # Min K-factor for scaling
-    k_max: float = None,
-    k: float = None,    # Max K-factor for scaling
-    custom_k: list = None,    # Custom K-factor array
-    v: int = 5                # Number of games in the "best-of-v" series
+    k_max: float = None,      # Max K-factor for scaling
+    base_k: float = None,     # Base K-factor for static scaling
+    custom_k_factors: list = None,  # Custom K-factor array
+    games_per_series: int = 5,      # Number of games in the "best-of-v" series
+    max_deviation_multiplier: float = 2.0,  # Maximum multiplier for deviation adjustment (h)
+    deviation_scaling_factor: float = 200.0,  # Scaling factor for deviation adjustment (w)
+    base_multiplier_factor: float = 0.5  # Base multiplier factor (p)
 ):
     """
-    Simulate n tournaments with m players and return the final ratings and snapshots.
+    Simulate num_tournaments with num_players and return the final ratings and snapshots.
 
     Args:
-        m (int): Number of players.
-        p (int): Players per tournament.
-        n (int): Number of tournaments.
-        k (float): K-factor for Elo updates.
+        num_players (int): Number of players.
+        players_per_tournament (int): Players per tournament.
+        num_tournaments (int): Number of tournaments.
         elo_formula (Callable): Function to calculate expected score.
         decay_factor (float): Decay factor to apply.
-        initial_score (int): Initial Elo rating for players.
+        initial_rating (int): Initial Elo rating for players.
         k_scaling (str): Scaling type for K-factor ("log", "sqrt", "linear", "static", "custom").
         k_min (float): Min K-factor for scaling (used for "log", "sqrt", "linear").
         k_max (float): Max K-factor for scaling.
-        custom_k (list): Custom K-factor array for each round.
-        v (int): Number of games in the "best-of-v" series.
+        base_k (float): K-factor for Elo updates (used for static scaling).
+        custom_k_factors (list): Custom K-factor array for each round.
+        games_per_series (int): Number of games in the "best-of-v" series.
+        max_deviation_multiplier (float): Maximum multiplier for deviation adjustment (h).
+        deviation_scaling_factor (float): Scaling factor for deviation adjustment (w).
+        base_multiplier_factor (float): Base multiplier factor (p).
 
     Returns:
         List[Player]: Final sorted ratings.
-        np.ndarray: Snapshots of rankings (shape: m x n).
+        np.ndarray: Snapshots of rankings (shape: num_players x num_tournaments).
         List[str]: Player IDs in order.
     """
-    players, history = load_players_and_history(m, n, p - 1, initial_score)
+    # Load players and history
+    players, history = load_players_and_history(
+        num_players, num_tournaments, players_per_tournament - 1, initial_rating
+    )
 
-    d = 5  # Interval for decay
-    snapshots = np.zeros((m, n))  # Preallocate memory for snapshots
+    interval_for_decay = 5  # Interval for applying decay
+    snapshots = np.zeros((num_players, num_tournaments))  # Preallocate memory for snapshots
 
     # Dynamically build the arguments for run_tournament
-    run_args = {
+    run_tournament_args = {
         "players": players,
-        "p": p,
+        "num_participants": players_per_tournament,
         "history": history,
         "elo_formula": elo_formula,
-        "v": v
+        "games_per_series": games_per_series,
+        "h": max_deviation_multiplier,
+        "w": deviation_scaling_factor,
+        "base_multiplier": base_multiplier_factor,
     }
 
     # Add optional arguments if they are not None
-    if k is not None:
-        run_args["k"] = k
+    if base_k is not None:
+        run_tournament_args["k"] = base_k
     if k_scaling:
-        run_args["k_scaling"] = k_scaling
+        run_tournament_args["k_scaling"] = k_scaling
     if k_min is not None:
-        run_args["k_min"] = k_min
+        run_tournament_args["k_min"] = k_min
     if k_max is not None:
-        run_args["k_max"] = k_max
-    if custom_k is not None:
-        run_args["custom_k"] = custom_k
+        run_tournament_args["k_max"] = k_max
+    if custom_k_factors is not None:
+        run_tournament_args["custom_k"] = custom_k_factors
 
-    for i in range(n):
-        run_tournament(**run_args)
+    # Run tournaments
+    for tournament_index in range(num_tournaments):
+        run_tournament(**run_tournament_args)
 
         # Store player ratings for snapshots
-        snapshots[:, i] = [player.rating for player in players]
+        snapshots[:, tournament_index] = [player.rating for player in players]
 
         # Apply decay at intervals
-        if i % d == d - 1:
+        if tournament_index % interval_for_decay == interval_for_decay - 1:
             apply_decay(players, decay_factor)
 
     return sorted(players, key=lambda x: x.rating, reverse=True), snapshots, [player.id for player in players]
+
+
 
 

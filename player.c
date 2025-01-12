@@ -1510,6 +1510,7 @@ struct __pyx_obj_6player_Player {
   double rating;
   int matches_played;
   PyObject *rating_history;
+  int streak;
 };
 
 /* #### Code section: utility_code_proto ### */
@@ -2220,9 +2221,11 @@ static const char __pyx_k_2f[] = ".2f";
 static const char __pyx_k__3[] = ".";
 static const char __pyx_k_gc[] = "gc";
 static const char __pyx_k_id[] = "id";
-static const char __pyx_k__12[] = "?";
+static const char __pyx_k__14[] = "?";
 static const char __pyx_k_new[] = "__new__";
+static const char __pyx_k_won[] = "won";
 static const char __pyx_k_None[] = "None";
+static const char __pyx_k_bool[] = "bool";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
@@ -2257,6 +2260,7 @@ static const char __pyx_k_stringsource[] = "<stringsource>";
 static const char __pyx_k_use_setstate[] = "use_setstate";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_update_rating[] = "update_rating";
+static const char __pyx_k_update_streak[] = "update_streak";
 static const char __pyx_k_initial_rating[] = "initial_rating";
 static const char __pyx_k_pyx_PickleError[] = "__pyx_PickleError";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
@@ -2264,13 +2268,15 @@ static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_pyx_unpickle_Player[] = "__pyx_unpickle_Player";
 static const char __pyx_k_Player_update_rating[] = "Player.update_rating";
+static const char __pyx_k_Player_update_streak[] = "Player.update_streak";
 static const char __pyx_k_Player___reduce_cython[] = "Player.__reduce_cython__";
 static const char __pyx_k_Player___setstate_cython[] = "Player.__setstate_cython__";
-static const char __pyx_k_Incompatible_checksums_0x_x_vs_0[] = "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))";
+static const char __pyx_k_Incompatible_checksums_0x_x_vs_0[] = "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))";
 /* #### Code section: decls ### */
 static int __pyx_pf_6player_6Player___init__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_id, double __pyx_v_initial_rating); /* proto */
 static PyObject *__pyx_pf_6player_6Player_2update_rating(struct __pyx_obj_6player_Player *__pyx_v_self, double __pyx_v_new_rating); /* proto */
-static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6player_6Player_4update_streak(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_won); /* proto */
+static PyObject *__pyx_pf_6player_6Player_6__repr__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6player_6Player_2id___get__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
 static int __pyx_pf_6player_6Player_2id_2__set__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static int __pyx_pf_6player_6Player_2id_4__del__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
@@ -2281,8 +2287,10 @@ static int __pyx_pf_6player_6Player_14matches_played_2__set__(struct __pyx_obj_6
 static PyObject *__pyx_pf_6player_6Player_14rating_history___get__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
 static int __pyx_pf_6player_6Player_14rating_history_2__set__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static int __pyx_pf_6player_6Player_14rating_history_4__del__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6player_6Player_8__setstate_cython__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_pf_6player_6Player_6streak___get__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
+static int __pyx_pf_6player_6Player_6streak_2__set__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_6player_6Player_8__reduce_cython__(struct __pyx_obj_6player_Player *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6player_6Player_10__setstate_cython__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_tp_new_6player_Player(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 /* #### Code section: late_includes ### */
@@ -2327,10 +2335,12 @@ typedef struct {
   PyObject *__pyx_n_s_Player___reduce_cython;
   PyObject *__pyx_n_s_Player___setstate_cython;
   PyObject *__pyx_n_s_Player_update_rating;
+  PyObject *__pyx_n_s_Player_update_streak;
   PyObject *__pyx_kp_u_Rating;
-  PyObject *__pyx_n_s__12;
+  PyObject *__pyx_n_s__14;
   PyObject *__pyx_kp_u__3;
   PyObject *__pyx_n_s_asyncio_coroutines;
+  PyObject *__pyx_n_s_bool;
   PyObject *__pyx_n_s_cline_in_traceback;
   PyObject *__pyx_n_s_dict;
   PyObject *__pyx_n_s_dict_2;
@@ -2367,19 +2377,23 @@ typedef struct {
   PyObject *__pyx_n_s_test;
   PyObject *__pyx_n_s_update;
   PyObject *__pyx_n_s_update_rating;
+  PyObject *__pyx_n_s_update_streak;
   PyObject *__pyx_n_s_use_setstate;
-  PyObject *__pyx_int_65095944;
-  PyObject *__pyx_int_99906715;
-  PyObject *__pyx_int_142768080;
+  PyObject *__pyx_n_s_won;
+  PyObject *__pyx_int_163068269;
+  PyObject *__pyx_int_215580579;
+  PyObject *__pyx_int_259740171;
   PyObject *__pyx_tuple__2;
   PyObject *__pyx_tuple__4;
   PyObject *__pyx_tuple__6;
   PyObject *__pyx_tuple__8;
   PyObject *__pyx_tuple__10;
+  PyObject *__pyx_tuple__12;
   PyObject *__pyx_codeobj__5;
   PyObject *__pyx_codeobj__7;
   PyObject *__pyx_codeobj__9;
   PyObject *__pyx_codeobj__11;
+  PyObject *__pyx_codeobj__13;
 } __pyx_mstate;
 
 #if CYTHON_USE_MODULE_STATE
@@ -2435,10 +2449,12 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_Player___reduce_cython);
   Py_CLEAR(clear_module_state->__pyx_n_s_Player___setstate_cython);
   Py_CLEAR(clear_module_state->__pyx_n_s_Player_update_rating);
+  Py_CLEAR(clear_module_state->__pyx_n_s_Player_update_streak);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Rating);
-  Py_CLEAR(clear_module_state->__pyx_n_s__12);
+  Py_CLEAR(clear_module_state->__pyx_n_s__14);
   Py_CLEAR(clear_module_state->__pyx_kp_u__3);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_CLEAR(clear_module_state->__pyx_n_s_bool);
   Py_CLEAR(clear_module_state->__pyx_n_s_cline_in_traceback);
   Py_CLEAR(clear_module_state->__pyx_n_s_dict);
   Py_CLEAR(clear_module_state->__pyx_n_s_dict_2);
@@ -2475,19 +2491,23 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
   Py_CLEAR(clear_module_state->__pyx_n_s_update);
   Py_CLEAR(clear_module_state->__pyx_n_s_update_rating);
+  Py_CLEAR(clear_module_state->__pyx_n_s_update_streak);
   Py_CLEAR(clear_module_state->__pyx_n_s_use_setstate);
-  Py_CLEAR(clear_module_state->__pyx_int_65095944);
-  Py_CLEAR(clear_module_state->__pyx_int_99906715);
-  Py_CLEAR(clear_module_state->__pyx_int_142768080);
+  Py_CLEAR(clear_module_state->__pyx_n_s_won);
+  Py_CLEAR(clear_module_state->__pyx_int_163068269);
+  Py_CLEAR(clear_module_state->__pyx_int_215580579);
+  Py_CLEAR(clear_module_state->__pyx_int_259740171);
   Py_CLEAR(clear_module_state->__pyx_tuple__2);
   Py_CLEAR(clear_module_state->__pyx_tuple__4);
   Py_CLEAR(clear_module_state->__pyx_tuple__6);
   Py_CLEAR(clear_module_state->__pyx_tuple__8);
   Py_CLEAR(clear_module_state->__pyx_tuple__10);
+  Py_CLEAR(clear_module_state->__pyx_tuple__12);
   Py_CLEAR(clear_module_state->__pyx_codeobj__5);
   Py_CLEAR(clear_module_state->__pyx_codeobj__7);
   Py_CLEAR(clear_module_state->__pyx_codeobj__9);
   Py_CLEAR(clear_module_state->__pyx_codeobj__11);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__13);
   return 0;
 }
 #endif
@@ -2521,10 +2541,12 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_Player___reduce_cython);
   Py_VISIT(traverse_module_state->__pyx_n_s_Player___setstate_cython);
   Py_VISIT(traverse_module_state->__pyx_n_s_Player_update_rating);
+  Py_VISIT(traverse_module_state->__pyx_n_s_Player_update_streak);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Rating);
-  Py_VISIT(traverse_module_state->__pyx_n_s__12);
+  Py_VISIT(traverse_module_state->__pyx_n_s__14);
   Py_VISIT(traverse_module_state->__pyx_kp_u__3);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
+  Py_VISIT(traverse_module_state->__pyx_n_s_bool);
   Py_VISIT(traverse_module_state->__pyx_n_s_cline_in_traceback);
   Py_VISIT(traverse_module_state->__pyx_n_s_dict);
   Py_VISIT(traverse_module_state->__pyx_n_s_dict_2);
@@ -2561,19 +2583,23 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
   Py_VISIT(traverse_module_state->__pyx_n_s_update);
   Py_VISIT(traverse_module_state->__pyx_n_s_update_rating);
+  Py_VISIT(traverse_module_state->__pyx_n_s_update_streak);
   Py_VISIT(traverse_module_state->__pyx_n_s_use_setstate);
-  Py_VISIT(traverse_module_state->__pyx_int_65095944);
-  Py_VISIT(traverse_module_state->__pyx_int_99906715);
-  Py_VISIT(traverse_module_state->__pyx_int_142768080);
+  Py_VISIT(traverse_module_state->__pyx_n_s_won);
+  Py_VISIT(traverse_module_state->__pyx_int_163068269);
+  Py_VISIT(traverse_module_state->__pyx_int_215580579);
+  Py_VISIT(traverse_module_state->__pyx_int_259740171);
   Py_VISIT(traverse_module_state->__pyx_tuple__2);
   Py_VISIT(traverse_module_state->__pyx_tuple__4);
   Py_VISIT(traverse_module_state->__pyx_tuple__6);
   Py_VISIT(traverse_module_state->__pyx_tuple__8);
   Py_VISIT(traverse_module_state->__pyx_tuple__10);
+  Py_VISIT(traverse_module_state->__pyx_tuple__12);
   Py_VISIT(traverse_module_state->__pyx_codeobj__5);
   Py_VISIT(traverse_module_state->__pyx_codeobj__7);
   Py_VISIT(traverse_module_state->__pyx_codeobj__9);
   Py_VISIT(traverse_module_state->__pyx_codeobj__11);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__13);
   return 0;
 }
 #endif
@@ -2617,10 +2643,12 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_Player___reduce_cython __pyx_mstate_global->__pyx_n_s_Player___reduce_cython
 #define __pyx_n_s_Player___setstate_cython __pyx_mstate_global->__pyx_n_s_Player___setstate_cython
 #define __pyx_n_s_Player_update_rating __pyx_mstate_global->__pyx_n_s_Player_update_rating
+#define __pyx_n_s_Player_update_streak __pyx_mstate_global->__pyx_n_s_Player_update_streak
 #define __pyx_kp_u_Rating __pyx_mstate_global->__pyx_kp_u_Rating
-#define __pyx_n_s__12 __pyx_mstate_global->__pyx_n_s__12
+#define __pyx_n_s__14 __pyx_mstate_global->__pyx_n_s__14
 #define __pyx_kp_u__3 __pyx_mstate_global->__pyx_kp_u__3
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
+#define __pyx_n_s_bool __pyx_mstate_global->__pyx_n_s_bool
 #define __pyx_n_s_cline_in_traceback __pyx_mstate_global->__pyx_n_s_cline_in_traceback
 #define __pyx_n_s_dict __pyx_mstate_global->__pyx_n_s_dict
 #define __pyx_n_s_dict_2 __pyx_mstate_global->__pyx_n_s_dict_2
@@ -2657,19 +2685,23 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
 #define __pyx_n_s_update __pyx_mstate_global->__pyx_n_s_update
 #define __pyx_n_s_update_rating __pyx_mstate_global->__pyx_n_s_update_rating
+#define __pyx_n_s_update_streak __pyx_mstate_global->__pyx_n_s_update_streak
 #define __pyx_n_s_use_setstate __pyx_mstate_global->__pyx_n_s_use_setstate
-#define __pyx_int_65095944 __pyx_mstate_global->__pyx_int_65095944
-#define __pyx_int_99906715 __pyx_mstate_global->__pyx_int_99906715
-#define __pyx_int_142768080 __pyx_mstate_global->__pyx_int_142768080
+#define __pyx_n_s_won __pyx_mstate_global->__pyx_n_s_won
+#define __pyx_int_163068269 __pyx_mstate_global->__pyx_int_163068269
+#define __pyx_int_215580579 __pyx_mstate_global->__pyx_int_215580579
+#define __pyx_int_259740171 __pyx_mstate_global->__pyx_int_259740171
 #define __pyx_tuple__2 __pyx_mstate_global->__pyx_tuple__2
 #define __pyx_tuple__4 __pyx_mstate_global->__pyx_tuple__4
 #define __pyx_tuple__6 __pyx_mstate_global->__pyx_tuple__6
 #define __pyx_tuple__8 __pyx_mstate_global->__pyx_tuple__8
 #define __pyx_tuple__10 __pyx_mstate_global->__pyx_tuple__10
+#define __pyx_tuple__12 __pyx_mstate_global->__pyx_tuple__12
 #define __pyx_codeobj__5 __pyx_mstate_global->__pyx_codeobj__5
 #define __pyx_codeobj__7 __pyx_mstate_global->__pyx_codeobj__7
 #define __pyx_codeobj__9 __pyx_mstate_global->__pyx_codeobj__9
 #define __pyx_codeobj__11 __pyx_mstate_global->__pyx_codeobj__11
+#define __pyx_codeobj__13 __pyx_mstate_global->__pyx_codeobj__13
 /* #### Code section: module_code ### */
 
 /* "player.pyx":2
@@ -2819,7 +2851,7 @@ static int __pyx_pf_6player_6Player___init__(struct __pyx_obj_6player_Player *__
  *         self.rating = initial_rating
  *         self.matches_played = 0             # <<<<<<<<<<<<<<
  *         self.rating_history = [initial_rating]
- * 
+ *         self.streak = 0
  */
   __pyx_v_self->matches_played = 0;
 
@@ -2827,8 +2859,8 @@ static int __pyx_pf_6player_6Player___init__(struct __pyx_obj_6player_Player *__
  *         self.rating = initial_rating
  *         self.matches_played = 0
  *         self.rating_history = [initial_rating]             # <<<<<<<<<<<<<<
+ *         self.streak = 0
  * 
- *     def update_rating(self, double new_rating):
  */
   __pyx_t_1 = PyFloat_FromDouble(__pyx_v_initial_rating); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -2842,6 +2874,15 @@ static int __pyx_pf_6player_6Player___init__(struct __pyx_obj_6player_Player *__
   __Pyx_DECREF(__pyx_v_self->rating_history);
   __pyx_v_self->rating_history = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
+
+  /* "player.pyx":7
+ *         self.matches_played = 0
+ *         self.rating_history = [initial_rating]
+ *         self.streak = 0             # <<<<<<<<<<<<<<
+ * 
+ *     def update_rating(self, double new_rating):
+ */
+  __pyx_v_self->streak = 0;
 
   /* "player.pyx":2
  * cdef class Player:
@@ -2863,8 +2904,8 @@ static int __pyx_pf_6player_6Player___init__(struct __pyx_obj_6player_Player *__
   return __pyx_r;
 }
 
-/* "player.pyx":8
- *         self.rating_history = [initial_rating]
+/* "player.pyx":9
+ *         self.streak = 0
  * 
  *     def update_rating(self, double new_rating):             # <<<<<<<<<<<<<<
  *         """
@@ -2925,23 +2966,23 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "update_rating") < 0)) __PYX_ERR(0, 8, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "update_rating") < 0)) __PYX_ERR(0, 9, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
     }
-    __pyx_v_new_rating = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_new_rating == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L3_error)
+    __pyx_v_new_rating = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_new_rating == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("update_rating", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 8, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("update_rating", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 9, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2978,7 +3019,7 @@ static PyObject *__pyx_pf_6player_6Player_2update_rating(struct __pyx_obj_6playe
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("update_rating", 1);
 
-  /* "player.pyx":12
+  /* "player.pyx":13
  *         Update the player's rating and store it in the history.
  *         """
  *         self.rating = new_rating             # <<<<<<<<<<<<<<
@@ -2987,24 +3028,24 @@ static PyObject *__pyx_pf_6player_6Player_2update_rating(struct __pyx_obj_6playe
  */
   __pyx_v_self->rating = __pyx_v_new_rating;
 
-  /* "player.pyx":13
+  /* "player.pyx":14
  *         """
  *         self.rating = new_rating
  *         self.rating_history.append(new_rating)             # <<<<<<<<<<<<<<
  * 
- *     def __repr__(self):
+ *     def update_streak(self, won: bool):
  */
   if (unlikely(__pyx_v_self->rating_history == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "append");
-    __PYX_ERR(0, 13, __pyx_L1_error)
+    __PYX_ERR(0, 14, __pyx_L1_error)
   }
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_new_rating); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_new_rating); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyList_Append(__pyx_v_self->rating_history, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyList_Append(__pyx_v_self->rating_history, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "player.pyx":8
- *         self.rating_history = [initial_rating]
+  /* "player.pyx":9
+ *         self.streak = 0
  * 
  *     def update_rating(self, double new_rating):             # <<<<<<<<<<<<<<
  *         """
@@ -3024,29 +3065,215 @@ static PyObject *__pyx_pf_6player_6Player_2update_rating(struct __pyx_obj_6playe
   return __pyx_r;
 }
 
-/* "player.pyx":15
+/* "player.pyx":16
  *         self.rating_history.append(new_rating)
+ * 
+ *     def update_streak(self, won: bool):             # <<<<<<<<<<<<<<
+ *         """
+ *         Update the player's streak based on the outcome.
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6player_6Player_5update_streak(PyObject *__pyx_v_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+); /*proto*/
+PyDoc_STRVAR(__pyx_doc_6player_6Player_4update_streak, "\n        Update the player's streak based on the outcome.\n\n        Args:\n            won (bool): True if the player won, False otherwise.\n        ");
+static PyMethodDef __pyx_mdef_6player_6Player_5update_streak = {"update_streak", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_5update_streak, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6player_6Player_4update_streak};
+static PyObject *__pyx_pw_6player_6Player_5update_streak(PyObject *__pyx_v_self, 
+#if CYTHON_METH_FASTCALL
+PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
+#else
+PyObject *__pyx_args, PyObject *__pyx_kwds
+#endif
+) {
+  PyObject *__pyx_v_won = 0;
+  #if !CYTHON_METH_FASTCALL
+  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
+  #endif
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject* values[1] = {0};
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("update_streak (wrapper)", 0);
+  #if !CYTHON_METH_FASTCALL
+  #if CYTHON_ASSUME_SAFE_MACROS
+  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
+  #else
+  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
+  #endif
+  #endif
+  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
+  {
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_won,0};
+    if (__pyx_kwds) {
+      Py_ssize_t kw_args;
+      switch (__pyx_nargs) {
+        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
+      switch (__pyx_nargs) {
+        case  0:
+        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_won)) != 0)) {
+          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
+          kw_args--;
+        }
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 16, __pyx_L3_error)
+        else goto __pyx_L5_argtuple_error;
+      }
+      if (unlikely(kw_args > 0)) {
+        const Py_ssize_t kwd_pos_args = __pyx_nargs;
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "update_streak") < 0)) __PYX_ERR(0, 16, __pyx_L3_error)
+      }
+    } else if (unlikely(__pyx_nargs != 1)) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+    }
+    __pyx_v_won = values[0];
+  }
+  goto __pyx_L6_skip;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("update_streak", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 16, __pyx_L3_error)
+  __pyx_L6_skip:;
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_AddTraceback("player.Player.update_streak", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_6player_6Player_4update_streak(((struct __pyx_obj_6player_Player *)__pyx_v_self), __pyx_v_won);
+
+  /* function exit code */
+  {
+    Py_ssize_t __pyx_temp;
+    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
+      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
+    }
+  }
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6player_6Player_4update_streak(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_won) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  long __pyx_t_2;
+  long __pyx_t_3;
+  long __pyx_t_4;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("update_streak", 1);
+
+  /* "player.pyx":23
+ *             won (bool): True if the player won, False otherwise.
+ *         """
+ *         if won:             # <<<<<<<<<<<<<<
+ *             self.streak = self.streak + 1  # Increment for wins
+ *         else:
+ */
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_won); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 23, __pyx_L1_error)
+  if (__pyx_t_1) {
+
+    /* "player.pyx":24
+ *         """
+ *         if won:
+ *             self.streak = self.streak + 1  # Increment for wins             # <<<<<<<<<<<<<<
+ *         else:
+ *             self.streak = max(0, 0)  # Decrement for losses
+ */
+    __pyx_v_self->streak = (__pyx_v_self->streak + 1);
+
+    /* "player.pyx":23
+ *             won (bool): True if the player won, False otherwise.
+ *         """
+ *         if won:             # <<<<<<<<<<<<<<
+ *             self.streak = self.streak + 1  # Increment for wins
+ *         else:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "player.pyx":26
+ *             self.streak = self.streak + 1  # Increment for wins
+ *         else:
+ *             self.streak = max(0, 0)  # Decrement for losses             # <<<<<<<<<<<<<<
+ * 
+ *     def __repr__(self):
+ */
+  /*else*/ {
+    __pyx_t_2 = 0;
+    __pyx_t_3 = 0;
+    __pyx_t_1 = (__pyx_t_2 > __pyx_t_3);
+    if (__pyx_t_1) {
+      __pyx_t_4 = __pyx_t_2;
+    } else {
+      __pyx_t_4 = __pyx_t_3;
+    }
+    __pyx_v_self->streak = __pyx_t_4;
+  }
+  __pyx_L3:;
+
+  /* "player.pyx":16
+ *         self.rating_history.append(new_rating)
+ * 
+ *     def update_streak(self, won: bool):             # <<<<<<<<<<<<<<
+ *         """
+ *         Update the player's streak based on the outcome.
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("player.Player.update_streak", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "player.pyx":28
+ *             self.streak = max(0, 0)  # Decrement for losses
  * 
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return f"Player({self.id}, Rating: {self.rating:.2f}, Matches: {self.matches_played})"
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6player_6Player_5__repr__(PyObject *__pyx_v_self); /*proto*/
-static PyObject *__pyx_pw_6player_6Player_5__repr__(PyObject *__pyx_v_self) {
+static PyObject *__pyx_pw_6player_6Player_7__repr__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6player_6Player_7__repr__(PyObject *__pyx_v_self) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__repr__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  __pyx_r = __pyx_pf_6player_6Player_4__repr__(((struct __pyx_obj_6player_Player *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6player_6Player_6__repr__(((struct __pyx_obj_6player_Player *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Player *__pyx_v_self) {
+static PyObject *__pyx_pf_6player_6Player_6__repr__(struct __pyx_obj_6player_Player *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3059,13 +3286,13 @@ static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Pla
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__repr__", 1);
 
-  /* "player.pyx":16
+  /* "player.pyx":29
  * 
  *     def __repr__(self):
  *         return f"Player({self.id}, Rating: {self.rating:.2f}, Matches: {self.matches_played})"             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = 0;
   __pyx_t_3 = 127;
@@ -3073,7 +3300,7 @@ static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Pla
   __pyx_t_2 += 7;
   __Pyx_GIVEREF(__pyx_kp_u_Player);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_Player);
-  __pyx_t_4 = __Pyx_PyUnicode_Unicode(__pyx_v_self->id); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyUnicode_Unicode(__pyx_v_self->id); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_3 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4) > __pyx_t_3) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_4) : __pyx_t_3;
   __pyx_t_2 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_4);
@@ -3084,9 +3311,9 @@ static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Pla
   __pyx_t_2 += 10;
   __Pyx_GIVEREF(__pyx_kp_u_Rating);
   PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u_Rating);
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_self->rating); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_self->rating); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_Format(__pyx_t_4, __pyx_kp_u_2f); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Format(__pyx_t_4, __pyx_kp_u_2f); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_3 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_5) > __pyx_t_3) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_5) : __pyx_t_3;
@@ -3098,7 +3325,7 @@ static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Pla
   __pyx_t_2 += 11;
   __Pyx_GIVEREF(__pyx_kp_u_Matches);
   PyTuple_SET_ITEM(__pyx_t_1, 4, __pyx_kp_u_Matches);
-  __pyx_t_5 = __Pyx_PyUnicode_From_int(__pyx_v_self->matches_played, 0, ' ', 'd'); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyUnicode_From_int(__pyx_v_self->matches_played, 0, ' ', 'd'); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_2 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_5);
@@ -3108,15 +3335,15 @@ static PyObject *__pyx_pf_6player_6Player_4__repr__(struct __pyx_obj_6player_Pla
   __pyx_t_2 += 1;
   __Pyx_GIVEREF(__pyx_kp_u_);
   PyTuple_SET_ITEM(__pyx_t_1, 6, __pyx_kp_u_);
-  __pyx_t_5 = __Pyx_PyUnicode_Join(__pyx_t_1, 7, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyUnicode_Join(__pyx_t_1, 7, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "player.pyx":15
- *         self.rating_history.append(new_rating)
+  /* "player.pyx":28
+ *             self.streak = max(0, 0)  # Decrement for losses
  * 
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return f"Player({self.id}, Rating: {self.rating:.2f}, Matches: {self.matches_played})"
@@ -3336,6 +3563,7 @@ static int __pyx_pf_6player_6Player_6rating_2__set__(struct __pyx_obj_6player_Pl
  *     cdef public double rating
  *     cdef public int matches_played             # <<<<<<<<<<<<<<
  *     cdef public list rating_history
+ *     cdef public int streak
  */
 
 /* Python wrapper */
@@ -3417,6 +3645,7 @@ static int __pyx_pf_6player_6Player_14matches_played_2__set__(struct __pyx_obj_6
  *     cdef public double rating
  *     cdef public int matches_played
  *     cdef public list rating_history             # <<<<<<<<<<<<<<
+ *     cdef public int streak
  */
 
 /* Python wrapper */
@@ -3525,6 +3754,87 @@ static int __pyx_pf_6player_6Player_14rating_history_4__del__(struct __pyx_obj_6
   return __pyx_r;
 }
 
+/* "player.pxd":6
+ *     cdef public int matches_played
+ *     cdef public list rating_history
+ *     cdef public int streak             # <<<<<<<<<<<<<<
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6player_6Player_6streak_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_6player_6Player_6streak_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_6player_6Player_6streak___get__(((struct __pyx_obj_6player_Player *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6player_6Player_6streak___get__(struct __pyx_obj_6player_Player *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 1);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->streak); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 6, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("player.Player.streak.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_6player_6Player_6streak_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_6player_6Player_6streak_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_6player_6Player_6streak_2__set__(((struct __pyx_obj_6player_Player *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_6player_6Player_6streak_2__set__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  int __pyx_t_1;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 6, __pyx_L1_error)
+  __pyx_v_self->streak = __pyx_t_1;
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("player.Player.streak.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  return __pyx_r;
+}
+
 /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     cdef tuple state
@@ -3532,15 +3842,15 @@ static int __pyx_pf_6player_6Player_14rating_history_4__del__(struct __pyx_obj_6
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6player_6Player_7__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6player_6Player_9__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6player_6Player_7__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_7__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6player_6Player_7__reduce_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6player_6Player_9__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_9__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6player_6Player_9__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3565,14 +3875,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   if (unlikely(__pyx_nargs > 0)) {
     __Pyx_RaiseArgtupleInvalid("__reduce_cython__", 1, 0, 0, __pyx_nargs); return NULL;}
   if (unlikely(__pyx_kwds) && __Pyx_NumKwargs_FASTCALL(__pyx_kwds) && unlikely(!__Pyx_CheckKeywordStrings(__pyx_kwds, "__reduce_cython__", 0))) return NULL;
-  __pyx_r = __pyx_pf_6player_6Player_6__reduce_cython__(((struct __pyx_obj_6player_Player *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6player_6Player_8__reduce_cython__(((struct __pyx_obj_6player_Player *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6player_Player *__pyx_v_self) {
+static PyObject *__pyx_pf_6player_6Player_8__reduce_cython__(struct __pyx_obj_6player_Player *__pyx_v_self) {
   PyObject *__pyx_v_state = 0;
   PyObject *__pyx_v__dict = 0;
   int __pyx_v_use_setstate;
@@ -3581,8 +3891,9 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  int __pyx_t_4;
+  PyObject *__pyx_t_4 = NULL;
   int __pyx_t_5;
+  int __pyx_t_6;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3591,7 +3902,7 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
   /* "(tree fragment)":5
  *     cdef object _dict
  *     cdef bint use_setstate
- *     state = (self.id, self.matches_played, self.rating, self.rating_history)             # <<<<<<<<<<<<<<
+ *     state = (self.id, self.matches_played, self.rating, self.rating_history, self.streak)             # <<<<<<<<<<<<<<
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:
  */
@@ -3599,44 +3910,49 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = PyFloat_FromDouble(__pyx_v_self->rating); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 5, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->streak); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyTuple_New(5); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 5, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_v_self->id);
   __Pyx_GIVEREF(__pyx_v_self->id);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_self->id)) __PYX_ERR(2, 5, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_self->id)) __PYX_ERR(2, 5, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_1);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_1)) __PYX_ERR(2, 5, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_1)) __PYX_ERR(2, 5, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_2);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_t_2)) __PYX_ERR(2, 5, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_t_2)) __PYX_ERR(2, 5, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_self->rating_history);
   __Pyx_GIVEREF(__pyx_v_self->rating_history);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 3, __pyx_v_self->rating_history)) __PYX_ERR(2, 5, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 3, __pyx_v_self->rating_history)) __PYX_ERR(2, 5, __pyx_L1_error);
+  __Pyx_GIVEREF(__pyx_t_3);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 4, __pyx_t_3)) __PYX_ERR(2, 5, __pyx_L1_error);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_v_state = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
+  __pyx_v_state = ((PyObject*)__pyx_t_4);
+  __pyx_t_4 = 0;
 
   /* "(tree fragment)":6
  *     cdef bint use_setstate
- *     state = (self.id, self.matches_played, self.rating, self.rating_history)
+ *     state = (self.id, self.matches_played, self.rating, self.rating_history, self.streak)
  *     _dict = getattr(self, '__dict__', None)             # <<<<<<<<<<<<<<
  *     if _dict is not None:
  *         state += (_dict,)
  */
-  __pyx_t_3 = __Pyx_GetAttr3(((PyObject *)__pyx_v_self), __pyx_n_s_dict, Py_None); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_v__dict = __pyx_t_3;
-  __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_GetAttr3(((PyObject *)__pyx_v_self), __pyx_n_s_dict, Py_None); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 6, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_v__dict = __pyx_t_4;
+  __pyx_t_4 = 0;
 
   /* "(tree fragment)":7
- *     state = (self.id, self.matches_played, self.rating, self.rating_history)
+ *     state = (self.id, self.matches_played, self.rating, self.rating_history, self.streak)
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
  *         use_setstate = True
  */
-  __pyx_t_4 = (__pyx_v__dict != Py_None);
-  if (__pyx_t_4) {
+  __pyx_t_5 = (__pyx_v__dict != Py_None);
+  if (__pyx_t_5) {
 
     /* "(tree fragment)":8
  *     _dict = getattr(self, '__dict__', None)
@@ -3645,16 +3961,16 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
  *         use_setstate = True
  *     else:
  */
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 8, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 8, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_v__dict);
     __Pyx_GIVEREF(__pyx_v__dict);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v__dict)) __PYX_ERR(2, 8, __pyx_L1_error);
-    __pyx_t_2 = PyNumber_InPlaceAdd(__pyx_v_state, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 8, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF_SET(__pyx_v_state, ((PyObject*)__pyx_t_2));
-    __pyx_t_2 = 0;
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v__dict)) __PYX_ERR(2, 8, __pyx_L1_error);
+    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_state, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 8, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF_SET(__pyx_v_state, ((PyObject*)__pyx_t_3));
+    __pyx_t_3 = 0;
 
     /* "(tree fragment)":9
  *     if _dict is not None:
@@ -3666,7 +3982,7 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
     __pyx_v_use_setstate = 1;
 
     /* "(tree fragment)":7
- *     state = (self.id, self.matches_played, self.rating, self.rating_history)
+ *     state = (self.id, self.matches_played, self.rating, self.rating_history, self.streak)
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
@@ -3680,19 +3996,19 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
  *     else:
  *         use_setstate = self.id is not None or self.rating_history is not None             # <<<<<<<<<<<<<<
  *     if use_setstate:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, None), state
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, None), state
  */
   /*else*/ {
-    __pyx_t_5 = (__pyx_v_self->id != ((PyObject*)Py_None));
-    if (!__pyx_t_5) {
+    __pyx_t_6 = (__pyx_v_self->id != ((PyObject*)Py_None));
+    if (!__pyx_t_6) {
     } else {
-      __pyx_t_4 = __pyx_t_5;
+      __pyx_t_5 = __pyx_t_6;
       goto __pyx_L4_bool_binop_done;
     }
-    __pyx_t_5 = (__pyx_v_self->rating_history != ((PyObject*)Py_None));
-    __pyx_t_4 = __pyx_t_5;
+    __pyx_t_6 = (__pyx_v_self->rating_history != ((PyObject*)Py_None));
+    __pyx_t_5 = __pyx_t_6;
     __pyx_L4_bool_binop_done:;
-    __pyx_v_use_setstate = __pyx_t_4;
+    __pyx_v_use_setstate = __pyx_t_5;
   }
   __pyx_L3:;
 
@@ -3700,7 +4016,7 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
  *     else:
  *         use_setstate = self.id is not None or self.rating_history is not None
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, None), state
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, None), state
  *     else:
  */
   if (__pyx_v_use_setstate) {
@@ -3708,80 +4024,80 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
     /* "(tree fragment)":13
  *         use_setstate = self.id is not None or self.rating_history is not None
  *     if use_setstate:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, None), state             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, None), state             # <<<<<<<<<<<<<<
  *     else:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)
  */
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_pyx_unpickle_Player); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 13, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 13, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_pyx_unpickle_Player); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 13, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 13, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))))) __PYX_ERR(2, 13, __pyx_L1_error);
-    __Pyx_INCREF(__pyx_int_142768080);
-    __Pyx_GIVEREF(__pyx_int_142768080);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_142768080)) __PYX_ERR(2, 13, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))))) __PYX_ERR(2, 13, __pyx_L1_error);
+    __Pyx_INCREF(__pyx_int_215580579);
+    __Pyx_GIVEREF(__pyx_int_215580579);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_int_215580579)) __PYX_ERR(2, 13, __pyx_L1_error);
     __Pyx_INCREF(Py_None);
     __Pyx_GIVEREF(Py_None);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 2, Py_None)) __PYX_ERR(2, 13, __pyx_L1_error);
-    __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 13, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_GIVEREF(__pyx_t_2);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2)) __PYX_ERR(2, 13, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 2, Py_None)) __PYX_ERR(2, 13, __pyx_L1_error);
+    __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 13, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_3);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3)) __PYX_ERR(2, 13, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3)) __PYX_ERR(2, 13, __pyx_L1_error);
+    __Pyx_GIVEREF(__pyx_t_4);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_4)) __PYX_ERR(2, 13, __pyx_L1_error);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_v_state)) __PYX_ERR(2, 13, __pyx_L1_error);
-    __pyx_t_2 = 0;
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_v_state)) __PYX_ERR(2, 13, __pyx_L1_error);
     __pyx_t_3 = 0;
-    __pyx_r = __pyx_t_1;
-    __pyx_t_1 = 0;
+    __pyx_t_4 = 0;
+    __pyx_r = __pyx_t_2;
+    __pyx_t_2 = 0;
     goto __pyx_L0;
 
     /* "(tree fragment)":12
  *     else:
  *         use_setstate = self.id is not None or self.rating_history is not None
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, None), state
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, None), state
  *     else:
  */
   }
 
   /* "(tree fragment)":15
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, None), state
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, None), state
  *     else:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_Player__set_state(self, __pyx_state)
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_pyx_unpickle_Player); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 15, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 15, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_pyx_unpickle_Player); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 15, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 15, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))))) __PYX_ERR(2, 15, __pyx_L1_error);
-    __Pyx_INCREF(__pyx_int_142768080);
-    __Pyx_GIVEREF(__pyx_int_142768080);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_int_142768080)) __PYX_ERR(2, 15, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))))) __PYX_ERR(2, 15, __pyx_L1_error);
+    __Pyx_INCREF(__pyx_int_215580579);
+    __Pyx_GIVEREF(__pyx_int_215580579);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_int_215580579)) __PYX_ERR(2, 15, __pyx_L1_error);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_v_state)) __PYX_ERR(2, 15, __pyx_L1_error);
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 15, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_1);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1)) __PYX_ERR(2, 15, __pyx_L1_error);
-    __Pyx_GIVEREF(__pyx_t_3);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_3)) __PYX_ERR(2, 15, __pyx_L1_error);
-    __pyx_t_1 = 0;
-    __pyx_t_3 = 0;
-    __pyx_r = __pyx_t_2;
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_v_state)) __PYX_ERR(2, 15, __pyx_L1_error);
+    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 15, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_2);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2)) __PYX_ERR(2, 15, __pyx_L1_error);
+    __Pyx_GIVEREF(__pyx_t_4);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4)) __PYX_ERR(2, 15, __pyx_L1_error);
     __pyx_t_2 = 0;
+    __pyx_t_4 = 0;
+    __pyx_r = __pyx_t_3;
+    __pyx_t_3 = 0;
     goto __pyx_L0;
   }
 
@@ -3796,6 +4112,7 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("player.Player.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -3808,21 +4125,21 @@ static PyObject *__pyx_pf_6player_6Player_6__reduce_cython__(struct __pyx_obj_6p
 
 /* "(tree fragment)":16
  *     else:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_Player__set_state(self, __pyx_state)
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6player_6Player_9__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6player_6Player_11__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6player_6Player_9__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_9__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6player_6Player_9__setstate_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6player_6Player_11__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_11__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6player_6Player_11__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3896,7 +4213,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6player_6Player_8__setstate_cython__(((struct __pyx_obj_6player_Player *)__pyx_v_self), __pyx_v___pyx_state);
+  __pyx_r = __pyx_pf_6player_6Player_10__setstate_cython__(((struct __pyx_obj_6player_Player *)__pyx_v_self), __pyx_v___pyx_state);
 
   /* function exit code */
   {
@@ -3909,7 +4226,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6player_6Player_8__setstate_cython__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_6player_6Player_10__setstate_cython__(struct __pyx_obj_6player_Player *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3919,7 +4236,7 @@ static PyObject *__pyx_pf_6player_6Player_8__setstate_cython__(struct __pyx_obj_
   __Pyx_RefNannySetupContext("__setstate_cython__", 1);
 
   /* "(tree fragment)":17
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_Player__set_state(self, __pyx_state)             # <<<<<<<<<<<<<<
  */
@@ -3930,7 +4247,7 @@ static PyObject *__pyx_pf_6player_6Player_8__setstate_cython__(struct __pyx_obj_
 
   /* "(tree fragment)":16
  *     else:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_Player__set_state(self, __pyx_state)
  */
@@ -4098,9 +4415,9 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
   /* "(tree fragment)":4
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
- *     if __pyx_checksum not in (0x88277d0, 0x3e14908, 0x5f4749b):             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum not in (0xcd97fa3, 0xf7b520b, 0x9b8396d):             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  */
   __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_v___pyx_checksum); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -4110,9 +4427,9 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
 
     /* "(tree fragment)":5
  *     cdef object __pyx_result
- *     if __pyx_checksum not in (0x88277d0, 0x3e14908, 0x5f4749b):
+ *     if __pyx_checksum not in (0xcd97fa3, 0xf7b520b, 0x9b8396d):
  *         from pickle import PickleError as __pyx_PickleError             # <<<<<<<<<<<<<<
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  *     __pyx_result = Player.__new__(__pyx_type)
  */
     __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 5, __pyx_L1_error)
@@ -4131,9 +4448,9 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "(tree fragment)":6
- *     if __pyx_checksum not in (0x88277d0, 0x3e14908, 0x5f4749b):
+ *     if __pyx_checksum not in (0xcd97fa3, 0xf7b520b, 0x9b8396d):
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum             # <<<<<<<<<<<<<<
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum             # <<<<<<<<<<<<<<
  *     __pyx_result = Player.__new__(__pyx_type)
  *     if __pyx_state is not None:
  */
@@ -4149,15 +4466,15 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
     /* "(tree fragment)":4
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
- *     if __pyx_checksum not in (0x88277d0, 0x3e14908, 0x5f4749b):             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum not in (0xcd97fa3, 0xf7b520b, 0x9b8396d):             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  */
   }
 
   /* "(tree fragment)":7
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  *     __pyx_result = Player.__new__(__pyx_type)             # <<<<<<<<<<<<<<
  *     if __pyx_state is not None:
  *         __pyx_unpickle_Player__set_state(<Player> __pyx_result, __pyx_state)
@@ -4190,7 +4507,7 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
   __pyx_t_1 = 0;
 
   /* "(tree fragment)":8
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  *     __pyx_result = Player.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_Player__set_state(<Player> __pyx_result, __pyx_state)
@@ -4212,7 +4529,7 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "(tree fragment)":8
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  *     __pyx_result = Player.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_Player__set_state(<Player> __pyx_result, __pyx_state)
@@ -4225,7 +4542,7 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
  *         __pyx_unpickle_Player__set_state(<Player> __pyx_result, __pyx_state)
  *     return __pyx_result             # <<<<<<<<<<<<<<
  * cdef __pyx_unpickle_Player__set_state(Player __pyx_result, tuple __pyx_state):
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v___pyx_result);
@@ -4257,8 +4574,8 @@ static PyObject *__pyx_pf_6player___pyx_unpickle_Player(CYTHON_UNUSED PyObject *
  *         __pyx_unpickle_Player__set_state(<Player> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_Player__set_state(Player __pyx_result, tuple __pyx_state):             # <<<<<<<<<<<<<<
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]
- *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]
+ *     if len(__pyx_state) > 5 and hasattr(__pyx_result, '__dict__'):
  */
 
 static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_obj_6player_Player *__pyx_v___pyx_result, PyObject *__pyx_v___pyx_state) {
@@ -4282,9 +4599,9 @@ static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_o
   /* "(tree fragment)":12
  *     return __pyx_result
  * cdef __pyx_unpickle_Player__set_state(Player __pyx_result, tuple __pyx_state):
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]             # <<<<<<<<<<<<<<
- *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):
- *         __pyx_result.__dict__.update(__pyx_state[4])
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]             # <<<<<<<<<<<<<<
+ *     if len(__pyx_state) > 5 and hasattr(__pyx_result, '__dict__'):
+ *         __pyx_result.__dict__.update(__pyx_state[5])
  */
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
@@ -4328,19 +4645,28 @@ static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_o
   __Pyx_DECREF(__pyx_v___pyx_result->rating_history);
   __pyx_v___pyx_result->rating_history = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
+  if (unlikely(__pyx_v___pyx_state == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(2, 12, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 4, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 12, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 12, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v___pyx_result->streak = __pyx_t_2;
 
   /* "(tree fragment)":13
  * cdef __pyx_unpickle_Player__set_state(Player __pyx_result, tuple __pyx_state):
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]
- *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
- *         __pyx_result.__dict__.update(__pyx_state[4])
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]
+ *     if len(__pyx_state) > 5 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
+ *         __pyx_result.__dict__.update(__pyx_state[5])
  */
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
     __PYX_ERR(2, 13, __pyx_L1_error)
   }
   __pyx_t_5 = __Pyx_PyTuple_GET_SIZE(__pyx_v___pyx_state); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(2, 13, __pyx_L1_error)
-  __pyx_t_6 = (__pyx_t_5 > 4);
+  __pyx_t_6 = (__pyx_t_5 > 5);
   if (__pyx_t_6) {
   } else {
     __pyx_t_4 = __pyx_t_6;
@@ -4352,9 +4678,9 @@ static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_o
   if (__pyx_t_4) {
 
     /* "(tree fragment)":14
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]
- *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):
- *         __pyx_result.__dict__.update(__pyx_state[4])             # <<<<<<<<<<<<<<
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]
+ *     if len(__pyx_state) > 5 and hasattr(__pyx_result, '__dict__'):
+ *         __pyx_result.__dict__.update(__pyx_state[5])             # <<<<<<<<<<<<<<
  */
     __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v___pyx_result), __pyx_n_s_dict); if (unlikely(!__pyx_t_7)) __PYX_ERR(2, 14, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
@@ -4365,7 +4691,7 @@ static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_o
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
       __PYX_ERR(2, 14, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 4, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(2, 14, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 5, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(2, 14, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_9 = NULL;
     __pyx_t_10 = 0;
@@ -4394,9 +4720,9 @@ static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_o
 
     /* "(tree fragment)":13
  * cdef __pyx_unpickle_Player__set_state(Player __pyx_result, tuple __pyx_state):
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]
- *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
- *         __pyx_result.__dict__.update(__pyx_state[4])
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]
+ *     if len(__pyx_state) > 5 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
+ *         __pyx_result.__dict__.update(__pyx_state[5])
  */
   }
 
@@ -4404,8 +4730,8 @@ static PyObject *__pyx_f_6player___pyx_unpickle_Player__set_state(struct __pyx_o
  *         __pyx_unpickle_Player__set_state(<Player> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_Player__set_state(Player __pyx_result, tuple __pyx_state):             # <<<<<<<<<<<<<<
- *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]
- *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):
+ *     __pyx_result.id = __pyx_state[0]; __pyx_result.matches_played = __pyx_state[1]; __pyx_result.rating = __pyx_state[2]; __pyx_result.rating_history = __pyx_state[3]; __pyx_result.streak = __pyx_state[4]
+ *     if len(__pyx_state) > 5 and hasattr(__pyx_result, '__dict__'):
  */
 
   /* function exit code */
@@ -4538,15 +4864,30 @@ static int __pyx_setprop_6player_6Player_rating_history(PyObject *o, PyObject *v
   }
 }
 
-static PyObject *__pyx_specialmethod___pyx_pw_6player_6Player_5__repr__(PyObject *self, CYTHON_UNUSED PyObject *arg) {
-  return __pyx_pw_6player_6Player_5__repr__(self);
+static PyObject *__pyx_getprop_6player_6Player_streak(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_6player_6Player_6streak_1__get__(o);
+}
+
+static int __pyx_setprop_6player_6Player_streak(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_6player_6Player_6streak_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_specialmethod___pyx_pw_6player_6Player_7__repr__(PyObject *self, CYTHON_UNUSED PyObject *arg) {
+  return __pyx_pw_6player_6Player_7__repr__(self);
 }
 
 static PyMethodDef __pyx_methods_6player_Player[] = {
   {"update_rating", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_3update_rating, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6player_6Player_2update_rating},
-  {"__repr__", (PyCFunction)__pyx_specialmethod___pyx_pw_6player_6Player_5__repr__, METH_NOARGS|METH_COEXIST, 0},
-  {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_7__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_9__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"update_streak", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_5update_streak, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6player_6Player_4update_streak},
+  {"__repr__", (PyCFunction)__pyx_specialmethod___pyx_pw_6player_6Player_7__repr__, METH_NOARGS|METH_COEXIST, 0},
+  {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_9__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6player_6Player_11__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -4555,12 +4896,13 @@ static struct PyGetSetDef __pyx_getsets_6player_Player[] = {
   {(char *)"rating", __pyx_getprop_6player_6Player_rating, __pyx_setprop_6player_6Player_rating, (char *)0, 0},
   {(char *)"matches_played", __pyx_getprop_6player_6Player_matches_played, __pyx_setprop_6player_6Player_matches_played, (char *)0, 0},
   {(char *)"rating_history", __pyx_getprop_6player_6Player_rating_history, __pyx_setprop_6player_6Player_rating_history, (char *)0, 0},
+  {(char *)"streak", __pyx_getprop_6player_6Player_streak, __pyx_setprop_6player_6Player_streak, (char *)0, 0},
   {0, 0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
 static PyType_Slot __pyx_type_6player_Player_slots[] = {
   {Py_tp_dealloc, (void *)__pyx_tp_dealloc_6player_Player},
-  {Py_tp_repr, (void *)__pyx_pw_6player_6Player_5__repr__},
+  {Py_tp_repr, (void *)__pyx_pw_6player_6Player_7__repr__},
   {Py_tp_traverse, (void *)__pyx_tp_traverse_6player_Player},
   {Py_tp_clear, (void *)__pyx_tp_clear_6player_Player},
   {Py_tp_methods, (void *)__pyx_methods_6player_Player},
@@ -4598,7 +4940,7 @@ static PyTypeObject __pyx_type_6player_Player = {
   #if PY_MAJOR_VERSION >= 3
   0, /*tp_as_async*/
   #endif
-  __pyx_pw_6player_6Player_5__repr__, /*tp_repr*/
+  __pyx_pw_6player_6Player_7__repr__, /*tp_repr*/
   0, /*tp_as_number*/
   0, /*tp_as_sequence*/
   0, /*tp_as_mapping*/
@@ -4690,10 +5032,12 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_Player___reduce_cython, __pyx_k_Player___reduce_cython, sizeof(__pyx_k_Player___reduce_cython), 0, 0, 1, 1},
     {&__pyx_n_s_Player___setstate_cython, __pyx_k_Player___setstate_cython, sizeof(__pyx_k_Player___setstate_cython), 0, 0, 1, 1},
     {&__pyx_n_s_Player_update_rating, __pyx_k_Player_update_rating, sizeof(__pyx_k_Player_update_rating), 0, 0, 1, 1},
+    {&__pyx_n_s_Player_update_streak, __pyx_k_Player_update_streak, sizeof(__pyx_k_Player_update_streak), 0, 0, 1, 1},
     {&__pyx_kp_u_Rating, __pyx_k_Rating, sizeof(__pyx_k_Rating), 0, 1, 0, 0},
-    {&__pyx_n_s__12, __pyx_k__12, sizeof(__pyx_k__12), 0, 0, 1, 1},
+    {&__pyx_n_s__14, __pyx_k__14, sizeof(__pyx_k__14), 0, 0, 1, 1},
     {&__pyx_kp_u__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 1, 0, 0},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
+    {&__pyx_n_s_bool, __pyx_k_bool, sizeof(__pyx_k_bool), 0, 0, 1, 1},
     {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
     {&__pyx_n_s_dict, __pyx_k_dict, sizeof(__pyx_k_dict), 0, 0, 1, 1},
     {&__pyx_n_s_dict_2, __pyx_k_dict_2, sizeof(__pyx_k_dict_2), 0, 0, 1, 1},
@@ -4730,7 +5074,9 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
     {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
     {&__pyx_n_s_update_rating, __pyx_k_update_rating, sizeof(__pyx_k_update_rating), 0, 0, 1, 1},
+    {&__pyx_n_s_update_streak, __pyx_k_update_streak, sizeof(__pyx_k_update_streak), 0, 0, 1, 1},
     {&__pyx_n_s_use_setstate, __pyx_k_use_setstate, sizeof(__pyx_k_use_setstate), 0, 0, 1, 1},
+    {&__pyx_n_s_won, __pyx_k_won, sizeof(__pyx_k_won), 0, 0, 1, 1},
     {0, 0, 0, 0, 0, 0, 0}
   };
   return __Pyx_InitStrings(__pyx_string_tab);
@@ -4748,56 +5094,68 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "(tree fragment)":4
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
- *     if __pyx_checksum not in (0x88277d0, 0x3e14908, 0x5f4749b):             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum not in (0xcd97fa3, 0xf7b520b, 0x9b8396d):             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0x88277d0, 0x3e14908, 0x5f4749b) = (id, matches_played, rating, rating_history))" % __pyx_checksum
+ *         raise __pyx_PickleError, "Incompatible checksums (0x%x vs (0xcd97fa3, 0xf7b520b, 0x9b8396d) = (id, matches_played, rating, rating_history, streak))" % __pyx_checksum
  */
-  __pyx_tuple__2 = PyTuple_Pack(3, __pyx_int_142768080, __pyx_int_65095944, __pyx_int_99906715); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(3, __pyx_int_215580579, __pyx_int_259740171, __pyx_int_163068269); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(2, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "player.pyx":8
- *         self.rating_history = [initial_rating]
+  /* "player.pyx":9
+ *         self.streak = 0
  * 
  *     def update_rating(self, double new_rating):             # <<<<<<<<<<<<<<
  *         """
  *         Update the player's rating and store it in the history.
  */
-  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_new_rating); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_new_rating); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_player_pyx, __pyx_n_s_update_rating, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_player_pyx, __pyx_n_s_update_rating, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 9, __pyx_L1_error)
+
+  /* "player.pyx":16
+ *         self.rating_history.append(new_rating)
+ * 
+ *     def update_streak(self, won: bool):             # <<<<<<<<<<<<<<
+ *         """
+ *         Update the player's streak based on the outcome.
+ */
+  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_won); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_player_pyx, __pyx_n_s_update_streak, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 16, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     cdef tuple state
  *     cdef object _dict
  */
-  __pyx_tuple__6 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_state, __pyx_n_s_dict_2, __pyx_n_s_use_setstate); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
-  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_reduce_cython, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_state, __pyx_n_s_dict_2, __pyx_n_s_use_setstate); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_reduce_cython, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(2, 1, __pyx_L1_error)
 
   /* "(tree fragment)":16
  *     else:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_Player__set_state(self, __pyx_state)
  */
-  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_pyx_state); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(2, 16, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_setstate_cython, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(2, 16, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_pyx_state); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_setstate_cython, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(2, 16, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_Player(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_tuple__10 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Player, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Player, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(2, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4808,9 +5166,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
 static CYTHON_SMALL_CODE int __Pyx_InitConstants(void) {
   if (__Pyx_CreateStringTabAndInitStrings() < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  __pyx_int_65095944 = PyInt_FromLong(65095944L); if (unlikely(!__pyx_int_65095944)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_int_99906715 = PyInt_FromLong(99906715L); if (unlikely(!__pyx_int_99906715)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_int_142768080 = PyInt_FromLong(142768080L); if (unlikely(!__pyx_int_142768080)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_163068269 = PyInt_FromLong(163068269L); if (unlikely(!__pyx_int_163068269)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_215580579 = PyInt_FromLong(215580579L); if (unlikely(!__pyx_int_215580579)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_259740171 = PyInt_FromLong(259740171L); if (unlikely(!__pyx_int_259740171)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -5078,6 +5436,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_player(PyObject *__pyx_pyinit_modu
   #endif
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -5193,17 +5552,35 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "player.pyx":8
- *         self.rating_history = [initial_rating]
+  /* "player.pyx":9
+ *         self.streak = 0
  * 
  *     def update_rating(self, double new_rating):             # <<<<<<<<<<<<<<
  *         """
  *         Update the player's rating and store it in the history.
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_3update_rating, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player_update_rating, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_3update_rating, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player_update_rating, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_update_rating, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_update_rating, __pyx_t_2) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  PyType_Modified(__pyx_ptype_6player_Player);
+
+  /* "player.pyx":16
+ *         self.rating_history.append(new_rating)
+ * 
+ *     def update_streak(self, won: bool):             # <<<<<<<<<<<<<<
+ *         """
+ *         Update the player's streak based on the outcome.
+ */
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_won, __pyx_n_s_bool) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_5update_streak, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player_update_streak, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_3, __pyx_t_2);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_update_streak, __pyx_t_3) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_6player_Player);
 
   /* "(tree fragment)":1
@@ -5211,22 +5588,22 @@ if (!__Pyx_RefNanny) {
  *     cdef tuple state
  *     cdef object _dict
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_7__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player___reduce_cython, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_reduce_cython, __pyx_t_2) < 0) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_9__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player___reduce_cython, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_reduce_cython, __pyx_t_3) < 0) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_6player_Player);
 
   /* "(tree fragment)":16
  *     else:
- *         return __pyx_unpickle_Player, (type(self), 0x88277d0, state)
+ *         return __pyx_unpickle_Player, (type(self), 0xcd97fa3, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_Player__set_state(self, __pyx_state)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_9__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player___setstate_cython, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 16, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_setstate_cython, __pyx_t_2) < 0) __PYX_ERR(2, 16, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_6player_6Player_11__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_Player___setstate_cython, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_6player_Player, __pyx_n_s_setstate_cython, __pyx_t_3) < 0) __PYX_ERR(2, 16, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   PyType_Modified(__pyx_ptype_6player_Player);
 
   /* "(tree fragment)":1
@@ -5234,26 +5611,27 @@ if (!__Pyx_RefNanny) {
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6player_1__pyx_unpickle_Player, 0, __pyx_n_s_pyx_unpickle_Player, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Player, __pyx_t_2) < 0) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_6player_1__pyx_unpickle_Player, 0, __pyx_n_s_pyx_unpickle_Player, NULL, __pyx_n_s_player, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Player, __pyx_t_3) < 0) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "player.pyx":1
  * cdef class Player:             # <<<<<<<<<<<<<<
  *     def __init__(self, str id, double initial_rating=500):
  *         self.id = id
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_3) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /*--- Wrapped vars code ---*/
 
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
       __Pyx_AddTraceback("init player", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -9773,7 +10151,7 @@ __Pyx_PyType_GetName(PyTypeObject* tp)
     if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
         PyErr_Clear();
         Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__12);
+        name = __Pyx_NewRef(__pyx_n_s__14);
     }
     return name;
 }
