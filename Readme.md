@@ -261,6 +261,32 @@ Outputs the optimal parameters and their performance score.
 ### Analyze Results:
 The simulation generates an output file named player_results.txt, containing final ratings and match counts for all players.
 
+#### Intermediary results without implementation
+
+**with following parameters:**
+
+```python
+num_players = 100
+players_per_tournament = 16  
+num_tournaments = 1000  
+base_k = 64  
+k_min = 20  
+k_max = 80  
+decay_factor = 0 
+initial_rating = 700  
+tau = 80  
+k_scaling = "linear"  
+lam = 1.3
+```
+
+we get following results:
+
+![distribution](./media/ratings_distribution.png)
+![various parameters](./media/metrics_individual_plots.png)
+
+
+
+
 ## Applications
 
 This project is specifically designed for the Integration Bee but has broader applications in ranking systems for competitions. By simulating tournaments, users can evaluate the effectiveness of various configurations and refine the system for accuracy and fairness. The flexibility of the code makes it suitable for adapting to different competitive scenarios beyond mathematics.
