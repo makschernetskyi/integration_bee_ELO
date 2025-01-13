@@ -14,12 +14,12 @@ def run_single_simulation():
     num_players = 100  # Number of players <328
     players_per_tournament = 16  # Players per tournament
     num_tournaments = 5000  # Number of tournaments
-    base_k = 32  # K-factor
+    base_k = 512  # K-factor
     k_min = 20  # Increased to amplify dynamic K-factors
     k_max = 80  # Increased to reward top performers more in later rounds
-    decay_factor = 0  # Added a small decay factor to stabilize ratings over time
+    decay_factor = 0.2  # Added a small decay factor to stabilize ratings over time
     initial_rating = 700  # Reduced slightly to create more spread in the ratings
-    tau = 100  # Reduced to increase the gap impact in the expected score calculation
+    tau = 400  # Reduced to increase the gap impact in the expected score calculation
     k_scaling = "static"  # "sqrt" scaling tends to favor higher-rated players
     lam = 1.3  # Deviation scaling factor
 
@@ -191,4 +191,4 @@ def run_n_simulations(num_simulations=10):
 
 
 if __name__ == "__main__":
-    run_n_simulations(20)
+    run_single_simulation()

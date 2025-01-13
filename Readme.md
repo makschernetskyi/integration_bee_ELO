@@ -33,6 +33,10 @@ Where:
 
 ## Specifics of integration bee
 
+
+
+### Rating system
+
 Integration bee competitions are rare and expensive events hosting only around 16 participants each time.
 They also progress in complexity and overall skill levels. This means the rating has to be responsive, yet stable enough. It also has to account for the fact that recent wins have to be more valued than the old results.
 Additionally, the higher win-loss margin will affect the change in rating more by adjusting the "actual result" in elo formula by using float values in range between 0 and 1 instead of 0 and 1 only.
@@ -45,11 +49,9 @@ therefore we have introduced dynamic K that grows towards later rounds. Neverthe
   + `log` - K grows logarithmically
   + `custom` - allows to provide custom scale for K factor
 
-## Rating system
-
 We use standard elo with adjustable tau and K parameters. We also adjust initial player's rating, since it remains unknown which one would suit this sport the most.
 
-## Decay
+### Decay
 
 We adjust to old-recent recent matches balance by introducing traditional for NBA decay factor. This means that over time, preferably once a season, we take all the results and make them approach the mean.
 
