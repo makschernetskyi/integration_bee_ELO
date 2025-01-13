@@ -1,5 +1,5 @@
 import time  # Import time for measuring execution duration
-from elo import simulate_elo, get_expected_score
+from elo import simulate_elo, get_expected_score, f_factory
 import matplotlib.pyplot as plt
 import statistics
 import numpy as np
@@ -15,15 +15,16 @@ def run_single_simulation():
     players_per_tournament = 16  # Players per tournament
     num_tournaments = 5000  # Number of tournaments
     base_k = 32  # K-factor
-    k_min = 14.4  # Increased to amplify dynamic K-factors
-    k_max = 171.1  # Increased to reward top performers more in later rounds
+    k_min = 20  # Increased to amplify dynamic K-factors
+    k_max = 80  # Increased to reward top performers more in later rounds
     decay_factor = 0  # Added a small decay factor to stabilize ratings over time
     initial_rating = 700  # Reduced slightly to create more spread in the ratings
-    tau = 58  # Reduced to increase the gap impact in the expected score calculation
-    k_scaling = "sqrt"  # "sqrt" scaling tends to favor higher-rated players
-    max_deviation_multiplier = 2
-    deviation_scaling_factor = 184
-    base_multiplier_factor = 0.1
+    tau = 100  # Reduced to increase the gap impact in the expected score calculation
+    k_scaling = "static"  # "sqrt" scaling tends to favor higher-rated players
+    lam = 1.3  # Deviation scaling factor
+
+    # Generate f and f_inverse using f_factory
+    f, f_inverse = f_factory(mu=initial_rating, lam=lam)
 
     # Start timing
     start_time = time.time()
@@ -40,9 +41,10 @@ def run_single_simulation():
         k_min=k_min,
         k_max=k_max,
         base_k=base_k,
-        max_deviation_multiplier=max_deviation_multiplier,
-        deviation_scaling_factor=deviation_scaling_factor,
-        base_multiplier_factor=base_multiplier_factor,
+        custom_k_factors=None,
+        games_per_series=5,
+        f=f,
+        f_inverse=f_inverse,
     )
 
     # End timing
@@ -76,21 +78,21 @@ def run_single_simulation():
     plt.show()
 
 
-
 def run_n_simulations(num_simulations=10):
     num_players = 100  # Number of players <328
     players_per_tournament = 16  # Players per tournament
     num_tournaments = 1000  # Number of tournaments
-    base_k = 64  # K-factor
-    k_min = 14.4  # Increased to amplify dynamic K-factors
-    k_max = 171.1  # Increased to reward top performers more in later rounds
-    decay_factor = 0.29  # Added a small decay factor to stabilize ratings over time
+    base_k = 32  # K-factor
+    k_min = 20  # Increased to amplify dynamic K-factors
+    k_max = 80  # Increased to reward top performers more in later rounds
+    decay_factor = 0  # Added a small decay factor to stabilize ratings over time
     initial_rating = 700  # Reduced slightly to create more spread in the ratings
-    tau = 58  # Reduced to increase the gap impact in the expected score calculation
-    k_scaling = "sqrt"  # "sqrt" scaling tends to favor higher-rated players
-    max_deviation_multiplier = 2
-    deviation_scaling_factor = 184
-    base_multiplier_factor = 0.1
+    tau = 100  # Reduced to increase the gap impact in the expected score calculation
+    k_scaling = "linear"  # "sqrt" scaling tends to favor higher-rated players
+    lam = 1.3  # Deviation scaling factor
+
+    # Generate f and f_inverse using f_factory
+    f, f_inverse = f_factory(mu=initial_rating, lam=lam)
 
     metrics = {
         "variance": [],
@@ -101,7 +103,7 @@ def run_n_simulations(num_simulations=10):
         "mean_rating": [],
         "median_rating": [],
         "mean_drift": [],
-        "convergence": []
+        "convergence": [],
     }
 
     print("Running multiple Elo simulations and collecting metrics...")
@@ -123,9 +125,10 @@ def run_n_simulations(num_simulations=10):
                 k_min=k_min,
                 k_max=k_max,
                 base_k=base_k,
-                max_deviation_multiplier=max_deviation_multiplier,
-                deviation_scaling_factor=deviation_scaling_factor,
-                base_multiplier_factor=base_multiplier_factor,
+                custom_k_factors=None,
+                games_per_series=5,
+                f=f,
+                f_inverse=f_inverse,
             )
 
             end_time = time.time()
@@ -188,5 +191,4 @@ def run_n_simulations(num_simulations=10):
 
 
 if __name__ == "__main__":
-    run_single_simulation()
-
+    run_n_simulations(20)

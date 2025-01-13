@@ -1,4 +1,3 @@
-# cython_run_tournament.pyx
 import numpy as np
 cimport numpy as cnp
 
@@ -7,16 +6,6 @@ from player cimport Player  # Import Player class from an external file
 cdef double dynamic_k(int round_num, int total_rounds, double k_min, double k_max, str scaling):
     """
     Calculate the dynamic K value based on the round number and scaling method.
-
-    Args:
-        round_num (int): Current round number (1-indexed).
-        total_rounds (int): Total number of rounds in the tournament.
-        k_min (double): Minimum K-factor (for the first round).
-        k_max (double): Maximum K-factor (for the final round).
-        scaling (str): Scaling method ("linear", "log", "sqrt").
-
-    Returns:
-        double: K-factor for the current round.
     """
     if scaling == "linear":
         return k_min + (round_num - 1) / (total_rounds - 1) * (k_max - k_min)
@@ -28,54 +17,6 @@ cdef double dynamic_k(int round_num, int total_rounds, double k_min, double k_ma
         raise ValueError("Invalid scaling method for dynamic K. Choose 'linear', 'log', or 'sqrt'.")
 
 
-cdef double apply_momentum(
-    Player player,
-    double k,
-    double expected_score_w,
-    double expected_score_l,
-    double streak_multiplier=0.1,
-    double max_gap_adjustment=10.0  # Set default value for max_gap_adjustment
-):
-    """
-    Adjust the player's K-factor based on their current streak and the Elo gap.
-
-    Args:
-        player (Player): The player whose rating is being adjusted.
-        k (double): The base K-factor.
-        expected_score_w (double): Expected score of the winner.
-        expected_score_l (double): Expected score of the loser.
-        streak_multiplier (double): The scaling factor for streak effects (default: 0.4).
-        max_gap_adjustment (double): Maximum allowed value for the gap adjustment (default: 10.0).
-
-    Returns:
-        double: Adjusted K-factor based on momentum.
-    """
-    cdef int streak = max(0, player.streak)  # Ensure streak is non-negative
-    cdef double adjustment = streak_multiplier * streak
-
-    # Apply streak-based and gap-based adjustments
-    return k * adjustment
-
-
-cdef double deviation_multiplier(double rating, double mean_rating, double h, double w, double p):
-    """
-    Calculate the multiplier based on a player's deviation from the mean rating.
-
-    Args:
-        rating (double): The player's current Elo rating.
-        mean_rating (double): The mean Elo rating of all players.
-        h (double): Maximum value of the multiplier.
-        w (double): Scaling factor for deviation.
-        p (double): Base multiplier for all players.
-
-    Returns:
-        double: Multiplier for Elo adjustment.
-    """
-    cdef double deviation = max(0, rating - mean_rating)  # Absolute deviation from the mean
-    return h * (1 - p) * (1 - np.exp(-((deviation / w) ** 2))) + h * p + 1
-
-
-
 cdef void update_elo(
     Player winner,
     Player loser,
@@ -83,9 +24,8 @@ cdef void update_elo(
     object elo_formula,
     double match_outcome,
     double mean_rating,
-    double h=2.0,
-    double w=200.0,
-    double p=0.5
+    object f=None,
+    object f_inverse=None
 ):
     """
     Update Elo ratings for the winner and loser based on the Elo formula.
@@ -97,22 +37,18 @@ cdef void update_elo(
         elo_formula (callable): Function to calculate expected score.
         match_outcome (double): Scaled outcome (range [0, 1]) based on match results.
         mean_rating (double): The mean Elo rating of all players.
-        h (double): Maximum multiplier for deviation adjustment.
-        w (double): Scaling factor for deviation adjustment.
-        p (double): Base multiplier factor.
+        f (object): Transformation function for displayed ratings.
+        f_inverse (object): Inverse transformation function for actual ratings.
     """
-    cdef double expected_w = elo_formula(winner.rating, loser.rating)
-    cdef double expected_l = elo_formula(loser.rating, winner.rating)
+    cdef double expected_w = elo_formula(f_inverse(winner.rating), f_inverse(loser.rating))
+    cdef double expected_l = elo_formula(f_inverse(loser.rating), f_inverse(winner.rating))
 
-    # Compute deviation-based multiplier for the winner
-    cdef double dev_multiplier = deviation_multiplier(winner.rating, mean_rating, h, w, p)
+    # Transform to actual ratings, update, and transform back
+    winner_actual = f_inverse(winner.rating) + k * (match_outcome - expected_w)
+    loser_actual = f_inverse(loser.rating) + k * ((1 - match_outcome) - expected_l)
 
-    # Apply deviation multiplier to the K-factor
-    cdef double adjusted_k = k * dev_multiplier
-
-    # Update ratings using the adjusted K-factor
-    winner.update_rating(winner.rating + adjusted_k * (match_outcome - expected_w))
-    loser.update_rating(loser.rating + k * ((1 - match_outcome) - expected_l))
+    winner.rating = f(winner_actual)
+    loser.rating = f(loser_actual)
 
     # Increment matches played
     winner.matches_played += 1
@@ -121,7 +57,6 @@ cdef void update_elo(
     # Update streaks
     winner.update_streak(won=True)
     loser.update_streak(won=False)
-
 
 
 def run_tournament(
@@ -135,9 +70,12 @@ def run_tournament(
     double k_min=100,
     double k_max=400,
     list custom_k=None,
-    double h=2.0,  # Maximum multiplier for deviation adjustment
-    double w=200.0,  # Scaling factor for deviation adjustment
-    double base_multiplier=0.5  # Base multiplier factor for deviation adjustment
+    double h=2.0,
+    double w=200.0,
+    double base_multiplier=0.5,
+    object f=None,
+    object f_inverse=None,
+    double initial_rating=500
 ):
     """
     Simulate a tournament with a specified number of participants, supporting dynamic and static K.
@@ -156,6 +94,9 @@ def run_tournament(
         h (double): Maximum multiplier for deviation adjustment.
         w (double): Scaling factor for deviation adjustment.
         base_multiplier (double): Base multiplier factor for deviation adjustment.
+        f (object): Transformation function for displayed ratings.
+        f_inverse (object): Inverse transformation function for actual ratings.
+        initial_rating (double): The initial rating used as the static mean for f⁻¹ transformations.
     """
     cdef int len_participants
     cdef Player player_1, player_2
@@ -165,8 +106,8 @@ def run_tournament(
     cdef double current_k  # Declare here at the top of the function
     rng = np.random.default_rng()
 
-    # Compute mean Elo rating
-    cdef double mean_rating = np.mean([player.rating for player in players])
+    # Compute mean Elo rating (static mean, equal to initial rating)
+    cdef double mean_rating = initial_rating
 
     # Randomly select participants
     participants = rng.choice(players, size=num_participants, replace=False).tolist()
@@ -209,13 +150,13 @@ def run_tournament(
             if is_1_winner:
                 update_elo(
                     player_1, player_2, current_k, elo_formula, match_outcome,
-                    mean_rating, h, w, base_multiplier
+                    mean_rating, f, f_inverse
                 )
                 next_participants.append(player_1)
             else:
                 update_elo(
                     player_2, player_1, current_k, elo_formula, 1 - match_outcome,
-                    mean_rating, h, w, base_multiplier
+                    mean_rating, f, f_inverse
                 )
                 next_participants.append(player_2)
 
@@ -223,7 +164,3 @@ def run_tournament(
         participants = next_participants
         len_participants = len(participants)
         round_number += 1
-
-
-
-

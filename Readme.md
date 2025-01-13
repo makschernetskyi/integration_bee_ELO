@@ -48,11 +48,82 @@ therefore we have introduced dynamic K that grows towards later rounds. Neverthe
 ## Rating system
 
 We use standard elo with adjustable tau and K parameters. We also adjust initial player's rating, since it remains unknown which one would suit this sport the most.
+
+## Decay
+
 We adjust to old-recent recent matches balance by introducing traditional for NBA decay factor. This means that over time, preferably once a season, we take all the results and make them approach the mean.
 
 <img src="https://latex.codecogs.com/png.image?\inline&space;\large&space;\dpi{120}\bg{white}&space;R_i'=R_i&plus;\text{decay\_factor}\cdot(\bar{R}-R_i)" alt="elo expected score" />
 
 - In elo mean stays the same as initial ranking since elo represents a zero-sum ranking system.
+
+### skew function 𝑓
+
+#### Why Do We Need 𝑓?
+
+The Elo system preserves a zero-sum property, where the mean rating remains constant over time. However, Elo ratings tend to follow a symmetrical distribution, which may not align with our goals:
+
+- **Top Performers:** Higher ratings lack sufficient differentiation, making performance feel less rewarding.
+- **Low Performers:** Ratings drop too far below the mean, discouraging participation.
+- **Engagement:** A positively skewed distribution would make the system more engaging by rewarding top performers while keeping weaker players closer to the mean.
+
+#### What We Tried Before
+
+- **Adjusting 𝐾 Dynamically:**
+We experimented with rating wins of players far from the mean significantly higher, while losses were scaled down using a sigmoid-based 
+K adjustment. This resulted in positive skewness but disrupted the zero-sum nature of Elo. Over time, ratings either grew excessively high or low, leading to reduced variance and imbalance.
+
+- **Streak-Based Multipliers:**
+We introduced multipliers for players on winning streaks, making ratings more responsive to consecutive wins. However, this removed the zero-sum balance entirely and caused unpredictable shifts in ratings, failing to provide meaningful improvements.
+
+- **Direct Rating Adjustments:**
+We considered modifying the entire distribution at once to impose skewness. However, this felt arbitrary and overly subjective. Players would likely perceive such a change as unfair and inconsistent with Elo's transparent mechanics.
+
+
+#### To address these issues, we developed a skew function 𝑓
+
+**This allows us to:**
+
+- Maintain the zero-sum nature of Elo for actual calculations.
+- Introduce a positively skewed distribution for displayed ratings.
+- Ensure fairness and transparency through a bijective transformation between displayed and actual ratings.
+
+#### Requirements for 𝑓
+
+- **Bijectivity:** As mentioned before, to allow transformation between actual and displayed ratings.
+- **Controlled Skewness:** Increase ratings further from the mean while compressing those closer to it in a controllable manner.
+
+#### Proposed Transformation:
+The function 𝑓 and its inverse 𝑓 <sup> − 1 </sup> are defined as follows:
+
+<img src="https://latex.codecogs.com/png.image?\inline&space;\large&space;\dpi{120}\bg{white}f(x)=\begin{cases}(x-\mu)\cdot\lambda&plus;\mu,&\text{if}\;x>\mu\\(x-\mu)/\lambda&plus;\mu,&\text{if}\;x<\mu\\x,&\text{if}\;x=\mu\end{cases}" alt="elo expected score" />
+
+<img src="https://latex.codecogs.com/png.image?\inline&space;\large&space;\dpi{120}\bg{white}f^{-1}(y)=\begin{cases}(y-\mu)/\lambda&plus;\mu,&\text{if}\;y>\mu\\(y-\mu)\cdot\lambda&plus;\mu,&\text{if}\;y<\mu\\y,&\text{if}\;y=\mu\end{cases}" alt="elo expected score" />
+
+Where:
+
+𝜇: Static mean of the actual (Elo) ratings, equal to the initial mean rating.  
+𝜆>1: Scaling factor controlling skewness
+
+Updated Elo Formulas with 𝑓:
+
+1. **Expected Score:**  
+<img src="https://latex.codecogs.com/png.image?\inline&space;\dpi{300}\bg{white}E_A=\frac{1}{1&plus;b^{\frac{f^{-1}(R_B)-f^{-1}(R_A)}{\tau}}}">
+where **b** is the base, common values are e, 10 or 2
+
+
+2. **Rating Update:**
+  <img src="https://latex.codecogs.com/png.image?\inline&space;\dpi{300}\bg{white}R_A'=f\left(f^{-1}(R_A)&plus;K\cdot(S_A-E_A)\right)">
+
+4. Decay:
+<img src="https://latex.codecogs.com/png.image?\inline&space;\dpi{300}\bg{white}&space;R_i'=f\left(f^{-1}(R_i)&plus;\text{decay\_factor}\cdot(\bar{R}-f^{-1}(R_i))\right)">
+
+
+#### Benefits of this approach:
+- **Preserves Zero-Sum:** Actual Elo ratings remain zero-sum, ensuring fairness and stability.
+- **Engaging Display:** Displayed ratings provide positive skewness, motivating players across the skill spectrum.
+- **Transparency:** The bijective nature of 𝑓 allows players to verify how displayed ratings are derived.
+- **Flexibility:** Fully compatible with existing Elo modifications, such as dynamic 𝐾 and decay.
 
 ## Simulation
 
@@ -128,27 +199,64 @@ Bayesian optimization is particularly effective in our context, where evaluating
 
 
 ## Implementation
+The simulation system is implemented in Python, leveraging libraries like NumPy for numerical computations, pandas for data management, and Matplotlib for visualizations. It also utilizes Cython to precompile performance-critical parts of the code, significantly improving runtime for large-scale simulations.
 
-The simulation is implemented in Python and leverages various libraries for numerical computations, data management, statistics and optimisation techniques. Players and match data are loaded from a CSV file, enabling seamless integration of historical data. The system simulates single-elimination tournaments with configurable parameters to allow experimentation with different configurations and scenarios.
+### Prepare the Environment
+Clone the repository:
 
-### Prepare the Environment: 
-Clone the repository and install the required dependencies:
+```bash
+git clone <repository_url>
+cd <repository_name>
+```
+Install the required dependencies:
 
-`git clone <repository_url>`  
-`cd <repository_name>`  
-`pip install -r requirements.txt`  
+```bash
+pip install -r requirements.txt
+```
+Ensure you have a C compiler installed for compiling Cython. On Linux, use gcc, and on Windows, install Visual Studio Build Tools.
 
-### Configure Simulation Parameters:
-Edit the simulate_elo function in the script to adjust parameters such as the number of players (m), participants per tournament (p), number of tournaments (n), K-factor, and decay settings.
+### Compile the Cython Module
+The tournament simulation logic is precompiled using Cython for better performance. To compile the cython_run_tournament.pyx file, follow these steps:
 
-### Run the Simulation:
-Execute the script to simulate tournaments and update player ratings:
+Ensure the setup.py file is present in the root directory of the repository.
 
-`python main.py`
+Compile the Cython file:
 
-If you want to run optimization:
+```bash
+python setup.py build_ext --inplace
+```
+This will generate a shared object file (e.g., cython_run_tournament.cpython-<version>-<platform>.so) in the same directory.
 
-`python optimizing.py`
+Verify that the compilation succeeded:
+
+```bash
+python -c "import cython_run_tournament"
+```
+### Run the Simulation
+To simulate tournaments and analyze results, execute main.py:
+
+```bash
+python main.py
+```
+
+**This script:**
+
+Runs a predefined set of tournaments with the configured parameters.
+Generates the following:
+Ratings Statistics: Key metrics like variance, skewness, and convergence of player ratings.
+Distribution Plot: A histogram showing the final ratings distribution (ratings_distribution.png).
+Output File: Player ratings and other data saved in player_ratings.txt.
+Run Optimization
+To optimize the parameters of the Elo system using Bayesian optimization, execute optimizing.py:
+
+```bash
+python optimizing.py
+```
+**This script:**
+
+Finds the best parameters (e.g., K-factor, decay factor, and transformation parameters).
+Evaluates each parameter set using multiple simulations.
+Outputs the optimal parameters and their performance score.
 
 ### Analyze Results:
 The simulation generates an output file named player_results.txt, containing final ratings and match counts for all players.

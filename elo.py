@@ -14,19 +14,52 @@ def get_expected_score(tau):
     return expected_score
 
 
+def f_factory(mu: float, lam: float):
+    """
+    Create a piecewise linear transformation function f and its inverse f⁻¹.
+
+    Args:
+        mu (float): Mean rating.
+        lam (float): Deviation scaling factor (>1).
+
+    Returns:
+        tuple: A tuple (f, f_inverse) of callable functions.
+    """
+    def f(x: float) -> float:
+        if x > mu:
+            return (x - mu) * lam + mu
+        elif x < mu:
+            return (x - mu) / lam + mu
+        else:
+            return x
+
+    def f_inverse(x: float) -> float:
+        if x > mu:
+            return (x - mu) / lam + mu
+        elif x < mu:
+            return (x - mu) * lam + mu
+        else:
+            return x
+
+    return f, f_inverse
 
 
-def apply_decay(players: List[Player], decay_factor: float = 0.3):
+def apply_decay(players: List[Player], decay_factor: float, f: Callable, f_inverse: Callable):
     """
     Apply decay to player ratings, bringing them closer to the mean.
 
     Args:
+        f: transformation function to adjust ratings
         players (List[Player]): List of Player objects.
-        decay_factor (float): The fraction by which ratings decay toward the mean (default is 0.1).
+        decay_factor (float): The fraction by which ratings decay toward the mean.
+        f_inverse (Callable): Inverse transformation function to adjust ratings.
     """
-    mean_rating = np.mean([player.rating for player in players])
+    mean_rating = np.mean([f_inverse(player.rating) for player in players])  # Use transformed ratings
     for player in players:
-        player.rating += decay_factor * (mean_rating - player.rating)
+        actual_rating = f_inverse(player.rating)
+        actual_rating += decay_factor * (mean_rating - actual_rating)
+        player.rating = f(actual_rating)  # Transform back
+
 
 
 def preprocess_history(history_df):
@@ -89,20 +122,19 @@ def simulate_elo(
     players_per_tournament: int,
     num_tournaments: int,
     elo_formula: Callable,
-    decay_factor: float = 0.3,
-    initial_rating: int = 500,
-    k_scaling: str = "sqrt",  # Scaling type for dynamic K-factor
-    k_min: float = None,      # Min K-factor for scaling
-    k_max: float = None,      # Max K-factor for scaling
-    base_k: float = None,     # Base K-factor for static scaling
-    custom_k_factors: list = None,  # Custom K-factor array
-    games_per_series: int = 5,      # Number of games in the "best-of-v" series
-    max_deviation_multiplier: float = 2.0,  # Maximum multiplier for deviation adjustment (h)
-    deviation_scaling_factor: float = 200.0,  # Scaling factor for deviation adjustment (w)
-    base_multiplier_factor: float = 0.5  # Base multiplier factor (p)
+    decay_factor: float,
+    initial_rating: int,
+    k_scaling: str,
+    k_min: float = None,
+    k_max: float = None,
+    base_k: float = None,
+    custom_k_factors: list = None,
+    games_per_series: int = 5,
+    f: Callable = None,
+    f_inverse: Callable = None,
 ):
     """
-    Simulate num_tournaments with num_players and return the final ratings and snapshots.
+    Simulate tournaments with the f transformation applied.
 
     Args:
         num_players (int): Number of players.
@@ -114,12 +146,11 @@ def simulate_elo(
         k_scaling (str): Scaling type for K-factor ("log", "sqrt", "linear", "static", "custom").
         k_min (float): Min K-factor for scaling (used for "log", "sqrt", "linear").
         k_max (float): Max K-factor for scaling.
-        base_k (float): K-factor for Elo updates (used for static scaling).
+        base_k (float): Base K-factor for static scaling.
         custom_k_factors (list): Custom K-factor array for each round.
         games_per_series (int): Number of games in the "best-of-v" series.
-        max_deviation_multiplier (float): Maximum multiplier for deviation adjustment (h).
-        deviation_scaling_factor (float): Scaling factor for deviation adjustment (w).
-        base_multiplier_factor (float): Base multiplier factor (p).
+        f (Callable): Transformation function for displayed ratings.
+        f_inverse (Callable): Inverse transformation function for actual ratings.
 
     Returns:
         List[Player]: Final sorted ratings.
@@ -128,48 +159,56 @@ def simulate_elo(
     """
     # Load players and history
     players, history = load_players_and_history(
-        num_players, num_tournaments, players_per_tournament - 1, initial_rating
+        n_players=num_players,
+        n_tournaments=num_tournaments,
+        games_per_tournament=players_per_tournament - 1,
+        initial_score=initial_rating,
     )
 
-    interval_for_decay = 5  # Interval for applying decay
-    snapshots = np.zeros((num_players, num_tournaments))  # Preallocate memory for snapshots
+    # Preallocate snapshots for ratings
+    snapshots = np.zeros((num_players, num_tournaments))
 
-    # Dynamically build the arguments for run_tournament
-    run_tournament_args = {
-        "players": players,
-        "num_participants": players_per_tournament,
-        "history": history,
-        "elo_formula": elo_formula,
-        "games_per_series": games_per_series,
-        "h": max_deviation_multiplier,
-        "w": deviation_scaling_factor,
-        "base_multiplier": base_multiplier_factor,
-    }
-
-    # Add optional arguments if they are not None
-    if base_k is not None:
-        run_tournament_args["k"] = base_k
-    if k_scaling:
-        run_tournament_args["k_scaling"] = k_scaling
-    if k_min is not None:
-        run_tournament_args["k_min"] = k_min
-    if k_max is not None:
-        run_tournament_args["k_max"] = k_max
-    if custom_k_factors is not None:
-        run_tournament_args["custom_k"] = custom_k_factors
-
-    # Run tournaments
     for tournament_index in range(num_tournaments):
-        run_tournament(**run_tournament_args)
+        # Build arguments for run_tournament dynamically
+        tournament_args = {
+            "players": players,
+            "num_participants": players_per_tournament,
+            "history": history,
+            "elo_formula": lambda a, b: elo_formula(f_inverse(a), f_inverse(b)),  # Use true ratings
+            "games_per_series": games_per_series,
+            "k_scaling": k_scaling,
+            "f": f,
+            "f_inverse": f_inverse,
+            "initial_rating": initial_rating,
+        }
 
-        # Store player ratings for snapshots
+        # Add K-related arguments conditionally
+        if k_scaling in ["log", "sqrt", "linear"]:
+            tournament_args["k_min"] = k_min
+            tournament_args["k_max"] = k_max
+        elif k_scaling in ["static"]:
+            tournament_args["k"] = base_k
+        elif k_scaling == "custom":
+            tournament_args["custom_k"] = custom_k_factors
+
+        # Run the tournament
+        run_tournament(**tournament_args)
+
+        # Store transformed (displayed) ratings for snapshots
         snapshots[:, tournament_index] = [player.rating for player in players]
 
-        # Apply decay at intervals
-        if tournament_index % interval_for_decay == interval_for_decay - 1:
-            apply_decay(players, decay_factor)
+        # Apply decay every 5 tournaments
+        if tournament_index % 5 == 4:
+            apply_decay(players, decay_factor, f, f_inverse)
 
-    return sorted(players, key=lambda x: x.rating, reverse=True), snapshots, [player.id for player in players]
+    # Return final sorted ratings, snapshots, and player IDs
+    return (
+        sorted(players, key=lambda x: x.rating, reverse=True),
+        snapshots,
+        [player.id for player in players],
+    )
+
+
 
 
 
